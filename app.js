@@ -881,6 +881,136 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
+/* ========== 数据导入/导出（可提交到 Git 做完整备份） ========== */
+const DATA_FILE_VERSION = 1;
+
+function exportData() {
+  const payload = {
+    version: DATA_FILE_VERSION,
+    exportedAt: new Date().toISOString(),
+    app: "canteen_records",
+    storageKey: STORAGE_KEY,
+    stats: {
+      canteens: state.data.canteens.length,
+      floors: state.data.floors.length,
+      windows: state.data.windows.length,
+      records: state.data.records.length,
+    },
+    data: state.data,
+  };
+
+  const json = JSON.stringify(payload, null, 2);
+  const blob = new Blob([json], { type: "application/json;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+
+  const stamp = new Date();
+  const pad = (n) => String(n).padStart(2, "0");
+  const fname = `canteen-records-${stamp.getFullYear()}${pad(stamp.getMonth() + 1)}${pad(
+    stamp.getDate()
+  )}-${pad(stamp.getHours())}${pad(stamp.getMinutes())}.json`;
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = fname;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 0);
+
+  alert(
+    `✅ 已导出为：${fname}\n\n` +
+      `包含：${payload.stats.canteens} 个食堂 / ${payload.stats.floors} 层 / ${payload.stats.windows} 个窗口 / ${payload.stats.records} 条饭菜记录\n\n` +
+      `建议把这个 JSON 文件放到项目目录下，然后 git add + git commit 一起提交，误删就能从 Git 历史里恢复。`
+  );
+}
+
+async function importData(file) {
+  if (!file) return;
+  try {
+    const text = await file.text();
+    let payload;
+    try {
+      payload = JSON.parse(text);
+    } catch (e) {
+      alert("❌ 文件不是合法的 JSON，无法导入。");
+      return;
+    }
+
+    // 兼容：直接是 data 对象，或者是带 version + data 的包装
+    let incomingData = null;
+    if (payload && payload.data && Array.isArray(payload.data.canteens)) {
+      incomingData = payload.data;
+    } else if (payload && Array.isArray(payload.canteens)) {
+      incomingData = payload;
+    } else {
+      alert("❌ JSON 结构不匹配，不是本应用导出的备份文件。");
+      return;
+    }
+
+    const incomingCounts = {
+      canteens: incomingData.canteens?.length || 0,
+      floors: incomingData.floors?.length || 0,
+      windows: incomingData.windows?.length || 0,
+      records: incomingData.records?.length || 0,
+    };
+    const currentCounts = {
+      canteens: state.data.canteens.length,
+      floors: state.data.floors.length,
+      windows: state.data.windows.length,
+      records: state.data.records.length,
+    };
+
+    const summary =
+      `📦 导入文件中包含：\n` +
+      `   食堂 ${incomingCounts.canteens} / 楼层 ${incomingCounts.floors} / 窗口 ${incomingCounts.windows} / 饭菜记录 ${incomingCounts.records}\n\n` +
+      `📂 当前数据：\n` +
+      `   食堂 ${currentCounts.canteens} / 楼层 ${currentCounts.floors} / 窗口 ${currentCounts.windows} / 饭菜记录 ${currentCounts.records}\n\n` +
+      `请选择导入方式：\n\n` +
+      `【覆盖】清空当前所有数据，用导入文件完全替换（推荐用于恢复备份）\n` +
+      `【合并】保留现有数据，把导入内容追加进来（相同 id 的项目以导入文件为准）`;
+
+    const modeRaw = prompt(summary, "覆盖");
+    if (!modeRaw) return;
+    const mode = modeRaw.trim() === "合并" ? "merge" : "overwrite";
+
+    if (mode === "overwrite") {
+      state.data = {
+        canteens: [],
+        floors: [],
+        windows: [],
+        records: [],
+        ...incomingData,
+      };
+    } else {
+      // merge by id
+      const mergeById = (curList, newList, keyField = "id") => {
+        const map = new Map();
+        curList.forEach((it) => map.set(it[keyField], it));
+        (newList || []).forEach((it) => map.set(it[keyField], it));
+        return Array.from(map.values());
+      };
+      state.data.canteens = mergeById(state.data.canteens, incomingData.canteens);
+      state.data.floors = mergeById(state.data.floors, incomingData.floors);
+      state.data.windows = mergeById(state.data.windows, incomingData.windows);
+      state.data.records = mergeById(state.data.records, incomingData.records);
+    }
+
+    saveData();
+    // 回退到根视图并刷新
+    state.nav = { level: "root", canteenId: null, floorId: null, windowId: null };
+    navigateTo("root");
+
+    alert(
+      mode === "overwrite"
+        ? `✅ 已覆盖导入完成！\n现在共有：${state.data.canteens.length} 食堂 / ${state.data.floors.length} 楼层 / ${state.data.windows.length} 窗口 / ${state.data.records.length} 记录`
+        : `✅ 已合并导入完成！\n现在共有：${state.data.canteens.length} 食堂 / ${state.data.floors.length} 楼层 / ${state.data.windows.length} 窗口 / ${state.data.records.length} 记录`
+    );
+  } catch (e) {
+    console.error("导入失败:", e);
+    alert("❌ 导入失败：" + (e.message || e));
+  }
+}
+
 /* ========== 全局事件绑定 ========== */
 document.addEventListener("click", (e) => {
   // 关闭弹窗按钮
@@ -895,6 +1025,17 @@ document.addEventListener("click", (e) => {
 });
 
 document.getElementById("addCanteenBtn").addEventListener("click", openCanteenModal);
+
+// 数据导入/导出按钮
+document.getElementById("exportDataBtn").addEventListener("click", exportData);
+document.getElementById("importDataBtn").addEventListener("click", () => {
+  document.getElementById("importFileInput").click();
+});
+document.getElementById("importFileInput").addEventListener("change", (e) => {
+  const file = e.target.files && e.target.files[0];
+  if (file) importData(file);
+  e.target.value = ""; // 允许重复选择同一文件
+});
 
 // ESC 关闭弹窗
 document.addEventListener("keydown", (e) => {

@@ -12,6 +12,9 @@
     <header class="header">
       <h1>🍱 食堂饭菜记录本</h1>
       <div class="nav-actions">
+        <button id="exportDataBtn" class="btn btn-ghost" title="导出所有饭菜记录为 JSON 文件">📤 导出数据</button>
+        <button id="importDataBtn" class="btn btn-ghost" title="从 JSON 文件恢复饭菜记录">📥 导入数据</button>
+        <input type="file" id="importFileInput" accept="application/json,.json" hidden />
         <button id="addCanteenBtn" class="btn btn-secondary">+ 新建食堂</button>
         <button id="addRecordBtn" class="btn btn-primary">+ 新建记录</button>
       </div>
