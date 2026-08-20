@@ -2,6 +2,9 @@
 
 const STORAGE_KEY = "canteen_records_v1";
 
+/* ========== 本地同步服务器配置 ========== */
+const SYNC_SERVER_URL = "http://localhost:18923";
+
 /* ========== 状态管理 ========== */
 const state = {
   data: {
@@ -45,6 +48,28 @@ function saveData() {
     console.error("保存数据失败:", e);
     alert("保存数据失败：" + e.message);
   }
+  // 异步同步到本地服务器（失败静默忽略）
+  syncToServer();
+}
+
+// 同步数据到本地服务器（用于自动备份）
+let syncTimer = null;
+function syncToServer() {
+  // 防抖：500ms 内多次调用只发一次请求
+  if (syncTimer) clearTimeout(syncTimer);
+  syncTimer = setTimeout(async () => {
+    try {
+      await fetch(SYNC_SERVER_URL + "/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(state.data),
+      });
+      console.log("[同步] 数据已同步到本地服务器");
+    } catch (e) {
+      // 服务器没开或连接失败，静默忽略
+      console.log("[同步] 本地服务器未运行，跳过同步");
+    }
+  }, 500);
 }
 
 function uid() {
