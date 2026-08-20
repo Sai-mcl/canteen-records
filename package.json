@@ -1,0 +1,12 @@
+{
+  "name": "canteen-records-auto-backup",
+  "version": "1.0.0",
+  "description": "每天自动导出食堂饭菜记录并提交到 GitHub",
+  "main": "auto-backup.js",
+  "scripts": {
+    "backup": "node auto-backup.js"
+  },
+  "dependencies": {
+    "puppeteer-core": "^24.43.1"
+  }
+}

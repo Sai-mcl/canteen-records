@@ -1,0 +1,5 @@
+@echo off
+:: 食堂记录自动备份脚本
+:: 由 Windows 计划任务每天 20:00 调用
+cd /d "D:\trae\work\6a85a8c7728c7ab17b749665"
+node auto-backup.js >> "D:\trae\work\canteen-records\backup-log.txt" 2>&1
