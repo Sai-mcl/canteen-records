@@ -247,6 +247,7 @@ function renderCanteens() {
     html += `
       <div class="card" data-id="${c.id}">
         <div class="card-actions">
+          <button class="btn-icon edit" data-action="edit-canteen" data-id="${c.id}" title="编辑">✏️</button>
           <button class="btn-icon delete" data-action="delete-canteen" data-id="${c.id}" title="删除">🗑️</button>
         </div>
         <div class="card-icon">🏫</div>
@@ -289,6 +290,12 @@ function renderCanteens() {
       confirmDelete("canteen", btn.dataset.id);
     };
   });
+  grid.querySelectorAll("[data-action='edit-canteen']").forEach((btn) => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      openCanteenModal(btn.dataset.id);
+    };
+  });
 }
 
 /* ========== 渲染 - 楼层列表 ========== */
@@ -321,6 +328,7 @@ function renderFloors() {
     html += `
       <div class="card" data-id="${f.id}">
         <div class="card-actions">
+          <button class="btn-icon edit" data-action="edit-floor" data-id="${f.id}" title="编辑">✏️</button>
           <button class="btn-icon delete" data-action="delete-floor" data-id="${f.id}" title="删除">🗑️</button>
         </div>
         <div class="card-icon">🪜</div>
@@ -362,6 +370,12 @@ function renderFloors() {
       confirmDelete("floor", btn.dataset.id);
     };
   });
+  grid.querySelectorAll("[data-action='edit-floor']").forEach((btn) => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      openAddItemModal("floor", "编辑楼层", "楼层名称", btn.dataset.id);
+    };
+  });
 }
 
 /* ========== 渲染 - 窗口列表 ========== */
@@ -383,6 +397,7 @@ function renderWindows() {
     html += `
       <div class="card" data-id="${w.id}">
         <div class="card-actions">
+          <button class="btn-icon edit" data-action="edit-window" data-id="${w.id}" title="编辑">✏️</button>
           <button class="btn-icon delete" data-action="delete-window" data-id="${w.id}" title="删除">🗑️</button>
         </div>
         <div class="card-icon">🪟</div>
@@ -421,6 +436,12 @@ function renderWindows() {
     btn.onclick = (e) => {
       e.stopPropagation();
       confirmDelete("window", btn.dataset.id);
+    };
+  });
+  grid.querySelectorAll("[data-action='edit-window']").forEach((btn) => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      openAddItemModal("window", "编辑窗口", "窗口名称", btn.dataset.id);
     };
   });
 }
@@ -469,6 +490,10 @@ function renderRecords() {
 
     html += `
       <div class="record-card" data-id="${r.id}">
+        <div class="record-card-actions">
+          <button class="btn-icon edit" title="编辑" onclick="event.stopPropagation();window.__editRecord('${r.id}')">✏️</button>
+          <button class="btn-icon delete" title="删除" onclick="event.stopPropagation();window.__deleteRecordQuick('${r.id}')">🗑️</button>
+        </div>
         ${imgHtml}
         <div class="record-info">
           <div class="record-title-row">
@@ -493,9 +518,22 @@ function renderRecords() {
 }
 
 /* ========== 新建食堂 ========== */
-function openCanteenModal() {
-  document.getElementById("canteenForm").reset();
-  document.getElementById("canteenFloors").value = 1;
+function openCanteenModal(editId = null) {
+  const form = document.getElementById("canteenForm");
+  form.reset();
+  state.pendingEdit = editId ? { type: "canteen", id: editId } : null;
+  const titleEl = document.getElementById("canteenModalTitle");
+  if (editId) {
+    const c = getCanteen(editId);
+    if (!c) return;
+    document.getElementById("canteenName").value = c.name;
+    document.getElementById("canteenFloors").value = c.floors || 1;
+    document.getElementById("canteenNote").value = c.note || "";
+    if (titleEl) titleEl.textContent = "编辑食堂";
+  } else {
+    document.getElementById("canteenFloors").value = 1;
+    if (titleEl) titleEl.textContent = "新建食堂";
+  }
   openModal("canteenModal");
 }
 
@@ -507,33 +545,45 @@ document.getElementById("canteenForm").addEventListener("submit", (e) => {
 
   if (!name) return;
 
-  const canteen = {
-    id: uid(),
-    name,
-    floors,
-    note,
-    createdAt: Date.now(),
-  };
-  state.data.canteens.push(canteen);
+  if (state.pendingEdit && state.pendingEdit.type === "canteen") {
+    const idx = state.data.canteens.findIndex((x) => x.id === state.pendingEdit.id);
+    if (idx >= 0) {
+      state.data.canteens[idx].name = name;
+      state.data.canteens[idx].floors = floors;
+      state.data.canteens[idx].note = note;
+      const existing = getFloorsByCanteen(state.pendingEdit.id);
+      for (let i = existing.length + 1; i <= floors; i++) {
+        state.data.floors.push({ id: uid(), canteenId: state.pendingEdit.id, name: i + "楼", createdAt: Date.now() });
+      }
+    }
+  } else {
+    state.data.canteens.push({ id: uid(), name, floors, note, createdAt: Date.now() });
+  }
+  state.pendingEdit = null;
   saveData();
   closeModal("canteenModal");
 
-  // 如果在根视图，刷新
-  if (state.nav.level === "root") {
-    renderCanteens();
-  }
+  if (state.nav.level === "root") renderCanteens();
+  else if (state.nav.level === "canteen") { renderFloors(); updateBreadcrumb(); }
 });
 
 /* ========== 新建楼层/窗口 ========== */
 let addItemType = null;
-function openAddItemModal(type, title, label) {
+function openAddItemModal(type, title, label, editId = null) {
   addItemType = type;
+  state.pendingEdit = editId ? { type, id: editId } : null;
   document.getElementById("addItemTitle").textContent = title;
   document.getElementById("addItemLabel").innerHTML = label + ' <span class="required">*</span>';
-  document.getElementById("addItemName").value = "";
-  document.getElementById("addItemName").placeholder = label;
+  const input = document.getElementById("addItemName");
+  input.placeholder = label;
+  if (editId) {
+    if (type === "floor") { const fl = getFloor(editId); input.value = fl ? fl.name : ""; }
+    else if (type === "window") { const wn = getWindow(editId); input.value = wn ? wn.name : ""; }
+  } else {
+    input.value = "";
+  }
   openModal("addItemModal");
-  setTimeout(() => document.getElementById("addItemName").focus(), 100);
+  setTimeout(() => input.focus(), 100);
 }
 
 document.getElementById("addItemForm").addEventListener("submit", (e) => {
@@ -541,26 +591,32 @@ document.getElementById("addItemForm").addEventListener("submit", (e) => {
   const name = document.getElementById("addItemName").value.trim();
   if (!name || !addItemType) return;
 
+  const editing = state.pendingEdit && state.pendingEdit.type === addItemType;
+
   if (addItemType === "floor") {
-    state.data.floors.push({
-      id: uid(),
-      canteenId: state.nav.canteenId,
-      name,
-      createdAt: Date.now(),
-    });
+    if (editing) {
+      const idx = state.data.floors.findIndex((fl) => fl.id === state.pendingEdit.id);
+      if (idx >= 0) state.data.floors[idx].name = name;
+    } else {
+      state.data.floors.push({ id: uid(), canteenId: state.nav.canteenId, name, createdAt: Date.now() });
+    }
+    state.pendingEdit = null;
     saveData();
     closeModal("addItemModal");
     renderFloors();
+    updateBreadcrumb();
   } else if (addItemType === "window") {
-    state.data.windows.push({
-      id: uid(),
-      floorId: state.nav.floorId,
-      name,
-      createdAt: Date.now(),
-    });
+    if (editing) {
+      const idx = state.data.windows.findIndex((wn) => wn.id === state.pendingEdit.id);
+      if (idx >= 0) state.data.windows[idx].name = name;
+    } else {
+      state.data.windows.push({ id: uid(), floorId: state.nav.floorId, name, createdAt: Date.now() });
+    }
+    state.pendingEdit = null;
     saveData();
     closeModal("addItemModal");
     renderWindows();
+    updateBreadcrumb();
   }
 });
 
@@ -572,22 +628,58 @@ document.getElementById("addRecordAtWindowBtn").addEventListener("click", () => 
   openRecordModal(true);
 });
 
-function openRecordModal(useCurrentWindow) {
+function openRecordModal(useCurrentWindow, editId = null) {
   state.temp.images = [];
   state.temp.rating = 0;
   document.getElementById("recordForm").reset();
   document.getElementById("recordDate").value = todayStr();
-  updateStarsUI(0);
-  renderImagePreview();
 
+  const titleEl = document.getElementById("recordModalTitle");
+  const submitBtn = document.getElementById("recordSubmitBtn");
   const hierarchy = document.getElementById("recordHierarchy");
-  if (useCurrentWindow && state.nav.windowId) {
-    hierarchy.classList.add("hidden");
-  } else {
+
+  if (editId) {
+    state.pendingEdit = { type: "record", id: editId };
+    const r = getRecord(editId);
+    if (!r) return;
+    document.getElementById("recordDishName").value = r.dishName;
+    document.getElementById("recordDate").value = r.date || todayStr();
+    document.getElementById("recordPrice").value = r.price ? r.price : "";
+    document.getElementById("recordReview").value = r.review || "";
+    state.temp.rating = r.rating || 0;
+    state.temp.images = (r.images || []).slice();
+    updateStarsUI(state.temp.rating);
+    if (titleEl) titleEl.textContent = "编辑饭菜记录";
+    if (submitBtn) submitBtn.textContent = "保存修改";
     hierarchy.classList.remove("hidden");
     populateRecordHierarchy();
+    const w = getWindow(r.windowId);
+    if (w) {
+      const fl = getFloor(w.floorId);
+      if (fl) document.getElementById("recordCanteenSelect").value = fl.canteenId;
+      document.getElementById("recordCanteenSelect").dispatchEvent(new Event("change"));
+      setTimeout(() => {
+        document.getElementById("recordFloorSelect").value = w.floorId || "";
+        document.getElementById("recordFloorSelect").dispatchEvent(new Event("change"));
+        setTimeout(() => {
+          document.getElementById("recordWindowSelect").value = r.windowId;
+        }, 0);
+      }, 0);
+    }
+  } else {
+    state.pendingEdit = null;
+    updateStarsUI(0);
+    if (titleEl) titleEl.textContent = "新建饭菜记录";
+    if (submitBtn) submitBtn.textContent = "保存记录";
+    if (useCurrentWindow && state.nav.windowId) {
+      hierarchy.classList.add("hidden");
+    } else {
+      hierarchy.classList.remove("hidden");
+      populateRecordHierarchy();
+    }
   }
 
+  renderImagePreview();
   openModal("recordModal");
 }
 
@@ -748,26 +840,42 @@ document.getElementById("recordForm").addEventListener("submit", (e) => {
   const rating = Number(document.getElementById("recordRating").value) || 0;
   const review = document.getElementById("recordReview").value.trim();
 
-  const record = {
-    id: uid(),
-    windowId,
-    dishName,
-    date,
-    price: price ? Number(price) : null,
-    rating,
-    images: [...state.temp.images],
-    review,
-    createdAt: Date.now(),
-  };
-
-  state.data.records.push(record);
-  saveData();
-  closeModal("recordModal");
-
-  // 导航到对应的窗口视图
-  const w = getWindow(windowId);
-  if (w) {
-    navigateTo("window", windowId);
+  if (state.pendingEdit && state.pendingEdit.type === "record") {
+    const idx = state.data.records.findIndex((r) => r.id === state.pendingEdit.id);
+    if (idx >= 0) {
+      state.data.records[idx].windowId = windowId;
+      state.data.records[idx].dishName = dishName;
+      state.data.records[idx].date = date;
+      state.data.records[idx].price = price ? Number(price) : null;
+      state.data.records[idx].rating = rating;
+      state.data.records[idx].images = [...state.temp.images];
+      state.data.records[idx].review = review;
+    }
+    state.pendingEdit = null;
+    saveData();
+    closeModal("recordModal");
+    if (state.nav.level === "window") renderRecords();
+    if (state.nav.windowId !== windowId) {
+      const w = getWindow(windowId);
+      if (w) navigateTo("window", windowId);
+    }
+  } else {
+    const record = {
+      id: uid(),
+      windowId,
+      dishName,
+      date,
+      price: price ? Number(price) : null,
+      rating,
+      images: [...state.temp.images],
+      review,
+      createdAt: Date.now(),
+    };
+    state.data.records.push(record);
+    saveData();
+    closeModal("recordModal");
+    const w = getWindow(windowId);
+    if (w) navigateTo("window", windowId);
   }
 });
 
@@ -824,6 +932,7 @@ function openRecordDetail(recordId) {
     </div>
     <div class="detail-actions">
       <button class="btn btn-ghost" data-close="recordDetailModal">关闭</button>
+      <button class="btn btn-primary" id="editRecordBtn" style="background:#2563eb">✏️ 编辑记录</button>
       <button class="btn btn-danger" id="deleteRecordBtn">删除记录</button>
     </div>
   `;
@@ -831,6 +940,10 @@ function openRecordDetail(recordId) {
   document.getElementById("deleteRecordBtn").onclick = () => {
     closeModal("recordDetailModal");
     confirmDelete("record", recordId);
+  };
+  document.getElementById("editRecordBtn").onclick = () => {
+    closeModal("recordDetailModal");
+    openRecordModal(false, recordId);
   };
 
   openModal("recordDetailModal");
@@ -1067,6 +1180,14 @@ document.getElementById("importFileInput").addEventListener("change", (e) => {
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") closeAllModals();
 });
+
+/* ========== 记录卡片快捷操作 ========== */
+window.__editRecord = function (recordId) {
+  openRecordModal(false, recordId);
+};
+window.__deleteRecordQuick = function (recordId) {
+  confirmDelete("record", recordId);
+};
 
 /* ========== 初始化 ========== */
 function init() {
