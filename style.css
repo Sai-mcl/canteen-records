@@ -1,4 +1,4 @@
-/* ========== 全局样式 ========== */
+﻿/* ========== 全局样式 ========== */
 * {
   margin: 0;
   padding: 0;
@@ -277,6 +277,35 @@ body {
 
 .card:hover .card-actions {
   opacity: 1;
+}
+
+.btn-icon.edit:hover {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+/* 记录卡片操作按钮 */
+.record-card {
+  position: relative;
+}
+.record-card-actions {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: var(--transition);
+  z-index: 2;
+}
+.record-card:hover .record-card-actions {
+  opacity: 1;
+}
+.record-card-actions .btn-icon {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(4px);
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 /* 添加卡片 */

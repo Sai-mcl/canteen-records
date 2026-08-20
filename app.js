@@ -1,4 +1,4 @@
-/* ========== 食堂饭菜记录本 - 核心逻辑 ========== */
+﻿/* ========== 食堂饭菜记录本 - 核心逻辑 ========== */
 
 const STORAGE_KEY = "canteen_records_v1";
 
@@ -27,6 +27,7 @@ const state = {
     rating: 0,
   },
   pendingDelete: null, // { type, id }
+  pendingEdit: null,   // { type, id } for edit-mode form fills
 };
 
 /* ========== 存储工具 ========== */

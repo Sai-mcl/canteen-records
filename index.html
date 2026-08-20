@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
@@ -63,7 +63,7 @@
   <div id="canteenModal" class="modal hidden">
     <div class="modal-content">
       <div class="modal-header">
-        <h3>新建食堂</h3>
+        <h3 id="canteenModalTitle">新建食堂</h3>
         <button class="modal-close" data-close="canteenModal">&times;</button>
       </div>
       <form id="canteenForm" class="modal-body">
@@ -111,7 +111,7 @@
   <div id="recordModal" class="modal hidden">
     <div class="modal-content">
       <div class="modal-header">
-        <h3>新建饭菜记录</h3>
+        <h3 id="recordModalTitle">新建饭菜记录</h3>
         <button class="modal-close" data-close="recordModal">&times;</button>
       </div>
       <form id="recordForm" class="modal-body">
@@ -176,7 +176,7 @@
 
         <div class="modal-footer">
           <button type="button" class="btn btn-ghost" data-close="recordModal">取消</button>
-          <button type="submit" class="btn btn-primary">保存记录</button>
+          <button type="submit" id="recordSubmitBtn" class="btn btn-primary">保存记录</button>
         </div>
       </form>
     </div>
