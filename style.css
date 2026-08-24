@@ -1,4 +1,4 @@
-﻿/* ========== 全局样式 ========== */
+/* ========== 全局样式 ========== */
 * {
   margin: 0;
   padding: 0;
@@ -279,35 +279,6 @@ body {
   opacity: 1;
 }
 
-.btn-icon.edit:hover {
-  background: #eff6ff;
-  color: #2563eb;
-}
-
-/* 记录卡片操作按钮 */
-.record-card {
-  position: relative;
-}
-.record-card-actions {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  display: flex;
-  gap: 4px;
-  opacity: 0;
-  transition: var(--transition);
-  z-index: 2;
-}
-.record-card:hover .record-card-actions {
-  opacity: 1;
-}
-.record-card-actions .btn-icon {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(4px);
-  border: 1px solid var(--border);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
 /* 添加卡片 */
 .add-card {
   display: flex;
@@ -507,8 +478,81 @@ body {
   max-width: 720px;
 }
 
+.modal-medium {
+  max-width: 560px;
+}
+
 .modal-small {
   max-width: 400px;
+}
+
+/* ========== 存储管理 ========== */
+.storage-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.storage-stat {
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.storage-stat-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.storage-stat-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.storage-progress-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.storage-progress {
+  flex: 1;
+  height: 10px;
+  background: var(--surface);
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.storage-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: #10b981;
+  transition: width 0.35s ease, background 0.35s ease;
+}
+
+.storage-progress-text {
+  min-width: 64px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.storage-breakdown {
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.7;
 }
 
 @keyframes slideUp {
@@ -857,61 +901,4 @@ body {
   .modal-body {
     padding: 16px;
   }
-}
-
-/* ========== 楼层模式切换 ========== */
-.floor-mode-tabs {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-
-.floor-tab {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  padding: 8px 16px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: var(--surface);
-  transition: var(--transition);
-}
-
-.floor-tab.active {
-  background: var(--primary-light);
-  border-color: var(--primary);
-  color: var(--primary);
-}
-
-.floor-tab input {
-  margin: 0;
-  cursor: pointer;
-}
-/* ========== 日期快捷按钮 ========== */
-.date-shortcuts {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 8px;
-}
-
-.date-chip {
-  font-size: 12px;
-  padding: 5px 10px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: var(--transition);
-  line-height: 1;
-}
-
-.date-chip:hover {
-  background: var(--primary-light);
-  border-color: var(--primary);
-  color: var(--primary);
 }

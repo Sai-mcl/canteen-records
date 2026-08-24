@@ -1,4 +1,4 @@
-﻿/* ========== 饮食记录本 - 核心逻辑 ========== */
+/* ========== 食堂饭菜记录本 - 核心逻辑 ========== */
 
 const STORAGE_KEY = "canteen_records_v1";
 
@@ -27,7 +27,6 @@ const state = {
     rating: 0,
   },
   pendingDelete: null, // { type, id }
-  pendingEdit: null,   // { type, id } for edit-mode form fills
 };
 
 /* ========== 存储工具 ========== */
@@ -42,16 +41,115 @@ function loadData() {
   }
 }
 
-function saveData() {
+function saveData(options = {}) {
+  const { silent = false, _retrying = false } = options;
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state.data));
+    // 异步同步到本地服务器（失败静默忽略）
+    syncToServer();
   } catch (e) {
+    const msg = (e && e.message) ? e.message : String(e);
+    const isQuota = /quota/i.test(msg) || /QuotaExceeded/i.test(msg) || /setItem/.test(msg);
+    if (isQuota && !_retrying) {
+      if (!silent) alert("⚠️ 浏览器存储空间已满，正在自动瘦身压缩图片，请稍候…");
+      (async () => {
+        try {
+          const freed = await window.__shrinkAllImages(true);
+          saveData({ silent: true, _retrying: true });
+          window.__refreshStorageStats();
+          if (!silent) {
+            setTimeout(() => {
+              alert(`✅ 自动瘦身完成，节省约 ${formatBytes(freed)}。\n如果还是报存满，打开顶部「💾 存储」按钮手动管理：删除一些旧记录图片，或先📤导出备份。`);
+              const m = document.getElementById("storageModal");
+              if (m) m.classList.remove("hidden");
+            }, 80);
+          }
+        } catch (se) {
+          if (!silent) alert("自动瘦身失败：" + (se.message || se) + "\n请点顶部「💾 存储」按钮手动处理，或先 📤 导出数据做备份。");
+          window.__refreshStorageStats();
+          const m = document.getElementById("storageModal");
+          if (m) m.classList.remove("hidden");
+        }
+      })();
+      return;
+    }
     console.error("保存数据失败:", e);
-    alert("保存数据失败：" + e.message);
+    if (!silent) alert("保存数据失败：" + msg);
   }
-  // 异步同步到本地服务器（失败静默忽略）
-  syncToServer();
 }
+
+function formatBytes(b) {
+  if (b < 1024) return b + " B";
+  if (b < 1024 * 1024) return (b / 1024).toFixed(1) + " KB";
+  return (b / 1024 / 1024).toFixed(2) + " MB";
+}
+
+window.__refreshStorageStats = function () {
+  try {
+    const raw = JSON.stringify(state.data);
+    const bytes = (new Blob([raw])).size;
+    const pct = Math.min(100, Math.round((bytes / (5 * 1024 * 1024)) * 100));
+
+    const usedEl = document.getElementById("storageUsed");
+    if (usedEl) usedEl.textContent = formatBytes(bytes);
+
+    const fill = document.getElementById("storageProgressFill");
+    if (fill) {
+      fill.style.width = pct + "%";
+      fill.style.background = pct < 70 ? "#10b981" : pct < 90 ? "#f59e0b" : "#ef4444";
+    }
+    const txt = document.getElementById("storageProgressText");
+    if (txt) txt.textContent = pct + "%";
+
+    const bd = document.getElementById("storageBreakdown");
+    if (bd) {
+      let imageBytes = 0;
+      let imageCount = 0;
+      (state.data.records || []).forEach(r => {
+        (r.images || []).forEach(src => { imageBytes += src.length; imageCount++; });
+      });
+      const rawRec = JSON.stringify(state.data.records || []).length;
+      const rawCan = JSON.stringify(state.data.canteens || []).length;
+      const rawFlo = JSON.stringify(state.data.floors || []).length;
+      const rawWin = JSON.stringify(state.data.windows || []).length;
+      bd.innerHTML =
+        `<div><b>${(state.data.records || []).length}</b> 条饮食记录 · 图片 <b>${imageCount}</b> 张 (Base64 ≈ <b>${formatBytes(imageBytes)}</b>)</div>` +
+        `<div style="margin-top:6px;color:var(--text-secondary);font-size:13px">记录 JSON ${formatBytes(rawRec)} · 食堂 ${formatBytes(rawCan)} · 楼层 ${formatBytes(rawFlo)} · 窗口 ${formatBytes(rawWin)}</div>`;
+    }
+  } catch (e) { console.warn("refreshStorageStats error:", e); }
+};
+
+window.__shrinkAllImages = async function (returnBytesSaved = false, maxW = 720, quality = 0.6) {
+  const records = state.data.records || [];
+  let before = 0;
+  let after = 0;
+  let handled = 0;
+  let shrunk = 0;
+  for (let i = 0; i < records.length; i++) {
+    const r = records[i];
+    if (!r.images || r.images.length === 0) continue;
+    for (let k = 0; k < r.images.length; k++) {
+      const src = r.images[k];
+      before += src.length;
+      handled++;
+      try {
+        const smaller = await compressImage(src, maxW, quality);
+        after += smaller.length;
+        if (smaller.length < src.length) { r.images[k] = smaller; shrunk++; }
+        else { after = after - smaller.length + src.length; }
+      } catch (e) { after += src.length; }
+    }
+  }
+  const saved = Math.max(0, before - after);
+  if (shrunk > 0) {
+    saveData({ silent: true, _retrying: false });
+  }
+  window.__refreshStorageStats();
+  if (!returnBytesSaved) {
+    alert(`✅ 瘦身完成\n共处理图片 ${handled} 张，其中 ${shrunk} 张被进一步压缩\n节省空间约 ${formatBytes(saved)}`);
+  }
+  return saved;
+};
 
 // 同步数据到本地服务器（用于自动备份）
 let syncTimer = null;
@@ -95,89 +193,6 @@ function getStars(count) {
   const n = Math.max(0, Math.min(5, Number(count) || 0));
   return "★".repeat(n) + "☆".repeat(5 - n);
 }
-
-function addDaysToDate(dateStr, days) {
-  const d = dateStr ? new Date(dateStr) : new Date();
-  d.setDate(d.getDate() + days);
-  return formatDate(d);
-}
-function addMonthsToDate(dateStr, months) {
-  const d = dateStr ? new Date(dateStr) : new Date();
-  const day = d.getDate();
-  d.setDate(1);
-  d.setMonth(d.getMonth() + months);
-  const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
-  d.setDate(Math.min(day, lastDay));
-  return formatDate(d);
-}
-function addYearsToDate(dateStr, years) {
-  const d = dateStr ? new Date(dateStr) : new Date();
-  const day = d.getDate();
-  d.setFullYear(d.getFullYear() + years);
-  const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
-  d.setDate(Math.min(day, lastDay));
-  return formatDate(d);
-}
-
-let _dateShortcutsBound = false;
-function bindDateShortcuts() {
-  if (_dateShortcutsBound) return;
-  const wrap = document.getElementById("dateShortcuts");
-  if (!wrap) return;
-  _dateShortcutsBound = true;
-  wrap.querySelectorAll(".date-chip").forEach((btn) => {
-    if (btn.id === "datePickCustom") {
-      btn.addEventListener("click", () => {
-        const cur = document.getElementById("recordDate").value || todayStr();
-        const curYear = cur.split("-")[0];
-        const res = prompt("请输入年份（如 2018）", curYear);
-        if (!res) return;
-        const y = parseInt(res);
-        if (!y || y < 1900 || y > 2100) { alert("年份需在 1900 ~ 2100 之间"); return; }
-        const parts = cur.split("-");
-        const m = parts[1] || "01";
-        let dd = parts[2] || "01";
-        const lastDay = new Date(y, parseInt(m), 0).getDate();
-        if (parseInt(dd) > lastDay) dd = String(lastDay).padStart(2, "0");
-        document.getElementById("recordDate").value = `${y}-${m}-${dd}`;
-      });
-      return;
-    }
-    btn.addEventListener("click", () => {
-      const offset = btn.dataset.offset;
-      const value = parseInt(btn.dataset.value) || 0;
-      const cur = document.getElementById("recordDate").value || todayStr();
-      if (offset === "day") document.getElementById("recordDate").value = addDaysToDate(cur, value);
-      else if (offset === "week") document.getElementById("recordDate").value = addDaysToDate(cur, value * 7);
-      else if (offset === "month") document.getElementById("recordDate").value = addMonthsToDate(cur, value);
-      else if (offset === "year") document.getElementById("recordDate").value = addYearsToDate(cur, value);
-    });
-  });
-}
-
-function addDaysToDate(dateStr, days) {
-  const d = dateStr ? new Date(dateStr) : new Date();
-  d.setDate(d.getDate() + days);
-  return formatDate(d);
-}
-function addMonthsToDate(dateStr, months) {
-  const d = dateStr ? new Date(dateStr) : new Date();
-  const day = d.getDate();
-  d.setDate(1);
-  d.setMonth(d.getMonth() + months);
-  const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
-  d.setDate(Math.min(day, lastDay));
-  return formatDate(d);
-}
-function addYearsToDate(dateStr, years) {
-  const d = dateStr ? new Date(dateStr) : new Date();
-  const day = d.getDate();
-  d.setFullYear(d.getFullYear() + years);
-  const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
-  d.setDate(Math.min(day, lastDay));
-  return formatDate(d);
-}
-
 
 function getCanteen(id) {
   return state.data.canteens.find((c) => c.id === id);
@@ -238,7 +253,7 @@ function showView(name) {
 function updateBreadcrumb() {
   const bc = document.getElementById("breadcrumb");
   const items = [
-    { level: "root", label: "全部", id: null },
+    { level: "root", label: "全部食堂", id: null },
   ];
 
   if (state.nav.canteenId) {
@@ -330,12 +345,11 @@ function renderCanteens() {
     html += `
       <div class="card" data-id="${c.id}">
         <div class="card-actions">
-          <button class="btn-icon edit" data-action="edit-canteen" data-id="${c.id}" title="编辑">✏️</button>
           <button class="btn-icon delete" data-action="delete-canteen" data-id="${c.id}" title="删除">🗑️</button>
         </div>
         <div class="card-icon">🏫</div>
         <div class="card-title">${escapeHtml(c.name)}</div>
-        <div class="card-desc">${escapeHtml(c.note || (c.floorMode === "custom" ? (c.floorLabel || "自定义") : "共 " + c.floors + " 层楼"))}</div>
+        <div class="card-desc">${escapeHtml(c.note || "共 " + c.floors + " 层楼")}</div>
         <div class="card-meta">
           <div class="meta-item">🏢 ${floors.length} 层</div>
           <div class="meta-item">📝 ${recCount} 条记录</div>
@@ -348,7 +362,7 @@ function renderCanteens() {
   html += `
     <div class="card add-card" data-action="add-floor-quick">
       <div class="add-card-icon">+</div>
-      <div class="add-card-text">新建</div>
+      <div class="add-card-text">新建食堂</div>
     </div>
   `;
 
@@ -373,12 +387,6 @@ function renderCanteens() {
       confirmDelete("canteen", btn.dataset.id);
     };
   });
-  grid.querySelectorAll("[data-action='edit-canteen']").forEach((btn) => {
-    btn.onclick = (e) => {
-      e.stopPropagation();
-      openCanteenModal(btn.dataset.id);
-    };
-  });
 }
 
 /* ========== 渲染 - 楼层列表 ========== */
@@ -390,7 +398,7 @@ function renderFloors() {
 
   const floors = getFloorsByCanteen(canteenId);
   // 如果还没有楼层，按食堂设定的楼层数生成
-  if (floors.length === 0 && c.floorMode !== "custom" && c.floors > 0) {
+  if (floors.length === 0 && c.floors > 0) {
     for (let i = 1; i <= c.floors; i++) {
       const floor = {
         id: uid(),
@@ -411,7 +419,6 @@ function renderFloors() {
     html += `
       <div class="card" data-id="${f.id}">
         <div class="card-actions">
-          <button class="btn-icon edit" data-action="edit-floor" data-id="${f.id}" title="编辑">✏️</button>
           <button class="btn-icon delete" data-action="delete-floor" data-id="${f.id}" title="删除">🗑️</button>
         </div>
         <div class="card-icon">🪜</div>
@@ -453,12 +460,6 @@ function renderFloors() {
       confirmDelete("floor", btn.dataset.id);
     };
   });
-  grid.querySelectorAll("[data-action='edit-floor']").forEach((btn) => {
-    btn.onclick = (e) => {
-      e.stopPropagation();
-      openAddItemModal("floor", "编辑楼层", "楼层名称", btn.dataset.id);
-    };
-  });
 }
 
 /* ========== 渲染 - 窗口列表 ========== */
@@ -480,7 +481,6 @@ function renderWindows() {
     html += `
       <div class="card" data-id="${w.id}">
         <div class="card-actions">
-          <button class="btn-icon edit" data-action="edit-window" data-id="${w.id}" title="编辑">✏️</button>
           <button class="btn-icon delete" data-action="delete-window" data-id="${w.id}" title="删除">🗑️</button>
         </div>
         <div class="card-icon">🪟</div>
@@ -519,12 +519,6 @@ function renderWindows() {
     btn.onclick = (e) => {
       e.stopPropagation();
       confirmDelete("window", btn.dataset.id);
-    };
-  });
-  grid.querySelectorAll("[data-action='edit-window']").forEach((btn) => {
-    btn.onclick = (e) => {
-      e.stopPropagation();
-      openAddItemModal("window", "编辑窗口", "窗口名称", btn.dataset.id);
     };
   });
 }
@@ -573,10 +567,6 @@ function renderRecords() {
 
     html += `
       <div class="record-card" data-id="${r.id}">
-        <div class="record-card-actions">
-          <button class="btn-icon edit" title="编辑" onclick="event.stopPropagation();window.__editRecord('${r.id}')">✏️</button>
-          <button class="btn-icon delete" title="删除" onclick="event.stopPropagation();window.__deleteRecordQuick('${r.id}')">🗑️</button>
-        </div>
         ${imgHtml}
         <div class="record-info">
           <div class="record-title-row">
@@ -601,124 +591,47 @@ function renderRecords() {
 }
 
 /* ========== 新建食堂 ========== */
-function updateFloorTabActive() {
-  document.querySelectorAll(".floor-tab").forEach((tab) => {
-    const radio = tab.querySelector("input");
-    tab.classList.toggle("active", radio.checked);
-  });
-}
-
-function openCanteenModal(editId = null) {
-  const form = document.getElementById("canteenForm");
-  form.reset();
-  state.pendingEdit = editId ? { type: "canteen", id: editId } : null;
-  const titleEl = document.getElementById("canteenModalTitle");
-  const numberInput = document.getElementById("canteenFloors");
-  const customInput = document.getElementById("canteenFloorsCustom");
-
-  if (editId) {
-    const c = getCanteen(editId);
-    if (!c) return;
-    document.getElementById("canteenName").value = c.name;
-    document.getElementById("canteenNote").value = c.note || "";
-    if (c.floorMode === "custom") {
-      document.querySelector('input[name="floorMode"][value="custom"]').checked = true;
-      customInput.value = c.floorLabel || "";
-      numberInput.classList.add("hidden");
-      customInput.classList.remove("hidden");
-    } else {
-      document.querySelector('input[name="floorMode"][value="number"]').checked = true;
-      numberInput.value = c.floors || 1;
-      numberInput.classList.remove("hidden");
-      customInput.classList.add("hidden");
-    }
-    updateFloorTabActive();
-    if (titleEl) titleEl.textContent = "编辑";
-  } else {
-    document.querySelector('input[name="floorMode"][value="number"]').checked = true;
-    numberInput.value = 1;
-    numberInput.classList.remove("hidden");
-    customInput.classList.add("hidden");
-    updateFloorTabActive();
-    if (titleEl) titleEl.textContent = "新建";
-  }
+function openCanteenModal() {
+  document.getElementById("canteenForm").reset();
+  document.getElementById("canteenFloors").value = 1;
   openModal("canteenModal");
 }
-
-document.querySelectorAll('input[name="floorMode"]').forEach((radio) => {
-  radio.addEventListener("change", () => {
-    const numberInput = document.getElementById("canteenFloors");
-    const customInput = document.getElementById("canteenFloorsCustom");
-    if (radio.value === "number" && radio.checked) {
-      numberInput.classList.remove("hidden");
-      customInput.classList.add("hidden");
-    } else if (radio.value === "custom" && radio.checked) {
-      numberInput.classList.add("hidden");
-      customInput.classList.remove("hidden");
-    }
-    updateFloorTabActive();
-  });
-});
 
 document.getElementById("canteenForm").addEventListener("submit", (e) => {
   e.preventDefault();
   const name = document.getElementById("canteenName").value.trim();
+  const floors = parseInt(document.getElementById("canteenFloors").value) || 1;
   const note = document.getElementById("canteenNote").value.trim();
-  const floorMode = document.querySelector('input[name="floorMode"]:checked').value;
-
-  let floors = 0;
-  let floorLabel = "";
-  if (floorMode === "number") {
-    floors = parseInt(document.getElementById("canteenFloors").value) || 1;
-  } else {
-    floorLabel = document.getElementById("canteenFloorsCustom").value.trim();
-  }
 
   if (!name) return;
 
-  if (state.pendingEdit && state.pendingEdit.type === "canteen") {
-    const idx = state.data.canteens.findIndex((x) => x.id === state.pendingEdit.id);
-    if (idx >= 0) {
-      state.data.canteens[idx].name = name;
-      state.data.canteens[idx].note = note;
-      state.data.canteens[idx].floorMode = floorMode;
-      state.data.canteens[idx].floors = floors;
-      state.data.canteens[idx].floorLabel = floorLabel;
-      if (floorMode === "number") {
-        const existing = getFloorsByCanteen(state.pendingEdit.id);
-        for (let i = existing.length + 1; i <= floors; i++) {
-          state.data.floors.push({ id: uid(), canteenId: state.pendingEdit.id, name: i + "楼", createdAt: Date.now() });
-        }
-      }
-    }
-  } else {
-    state.data.canteens.push({ id: uid(), name, floors, floorMode, floorLabel, note, createdAt: Date.now() });
-  }
-  state.pendingEdit = null;
+  const canteen = {
+    id: uid(),
+    name,
+    floors,
+    note,
+    createdAt: Date.now(),
+  };
+  state.data.canteens.push(canteen);
   saveData();
   closeModal("canteenModal");
 
-  if (state.nav.level === "root") renderCanteens();
-  else if (state.nav.level === "canteen") { renderFloors(); updateBreadcrumb(); }
+  // 如果在根视图，刷新
+  if (state.nav.level === "root") {
+    renderCanteens();
+  }
 });
 
 /* ========== 新建楼层/窗口 ========== */
 let addItemType = null;
-function openAddItemModal(type, title, label, editId = null) {
+function openAddItemModal(type, title, label) {
   addItemType = type;
-  state.pendingEdit = editId ? { type, id: editId } : null;
   document.getElementById("addItemTitle").textContent = title;
   document.getElementById("addItemLabel").innerHTML = label + ' <span class="required">*</span>';
-  const input = document.getElementById("addItemName");
-  input.placeholder = label;
-  if (editId) {
-    if (type === "floor") { const fl = getFloor(editId); input.value = fl ? fl.name : ""; }
-    else if (type === "window") { const wn = getWindow(editId); input.value = wn ? wn.name : ""; }
-  } else {
-    input.value = "";
-  }
+  document.getElementById("addItemName").value = "";
+  document.getElementById("addItemName").placeholder = label;
   openModal("addItemModal");
-  setTimeout(() => input.focus(), 100);
+  setTimeout(() => document.getElementById("addItemName").focus(), 100);
 }
 
 document.getElementById("addItemForm").addEventListener("submit", (e) => {
@@ -726,32 +639,26 @@ document.getElementById("addItemForm").addEventListener("submit", (e) => {
   const name = document.getElementById("addItemName").value.trim();
   if (!name || !addItemType) return;
 
-  const editing = state.pendingEdit && state.pendingEdit.type === addItemType;
-
   if (addItemType === "floor") {
-    if (editing) {
-      const idx = state.data.floors.findIndex((fl) => fl.id === state.pendingEdit.id);
-      if (idx >= 0) state.data.floors[idx].name = name;
-    } else {
-      state.data.floors.push({ id: uid(), canteenId: state.nav.canteenId, name, createdAt: Date.now() });
-    }
-    state.pendingEdit = null;
+    state.data.floors.push({
+      id: uid(),
+      canteenId: state.nav.canteenId,
+      name,
+      createdAt: Date.now(),
+    });
     saveData();
     closeModal("addItemModal");
     renderFloors();
-    updateBreadcrumb();
   } else if (addItemType === "window") {
-    if (editing) {
-      const idx = state.data.windows.findIndex((wn) => wn.id === state.pendingEdit.id);
-      if (idx >= 0) state.data.windows[idx].name = name;
-    } else {
-      state.data.windows.push({ id: uid(), floorId: state.nav.floorId, name, createdAt: Date.now() });
-    }
-    state.pendingEdit = null;
+    state.data.windows.push({
+      id: uid(),
+      floorId: state.nav.floorId,
+      name,
+      createdAt: Date.now(),
+    });
     saveData();
     closeModal("addItemModal");
     renderWindows();
-    updateBreadcrumb();
   }
 });
 
@@ -763,59 +670,22 @@ document.getElementById("addRecordAtWindowBtn").addEventListener("click", () => 
   openRecordModal(true);
 });
 
-function openRecordModal(useCurrentWindow, editId = null) {
+function openRecordModal(useCurrentWindow) {
   state.temp.images = [];
   state.temp.rating = 0;
   document.getElementById("recordForm").reset();
   document.getElementById("recordDate").value = todayStr();
-  bindDateShortcuts();
+  updateStarsUI(0);
+  renderImagePreview();
 
-  const titleEl = document.getElementById("recordModalTitle");
-  const submitBtn = document.getElementById("recordSubmitBtn");
   const hierarchy = document.getElementById("recordHierarchy");
-
-  if (editId) {
-    state.pendingEdit = { type: "record", id: editId };
-    const r = getRecord(editId);
-    if (!r) return;
-    document.getElementById("recordDishName").value = r.dishName;
-    document.getElementById("recordDate").value = r.date || todayStr();
-    document.getElementById("recordPrice").value = r.price ? r.price : "";
-    document.getElementById("recordReview").value = r.review || "";
-    state.temp.rating = r.rating || 0;
-    state.temp.images = (r.images || []).slice();
-    updateStarsUI(state.temp.rating);
-    if (titleEl) titleEl.textContent = "编辑饭菜记录";
-    if (submitBtn) submitBtn.textContent = "保存修改";
+  if (useCurrentWindow && state.nav.windowId) {
+    hierarchy.classList.add("hidden");
+  } else {
     hierarchy.classList.remove("hidden");
     populateRecordHierarchy();
-    const w = getWindow(r.windowId);
-    if (w) {
-      const fl = getFloor(w.floorId);
-      if (fl) document.getElementById("recordCanteenSelect").value = fl.canteenId;
-      document.getElementById("recordCanteenSelect").dispatchEvent(new Event("change"));
-      setTimeout(() => {
-        document.getElementById("recordFloorSelect").value = w.floorId || "";
-        document.getElementById("recordFloorSelect").dispatchEvent(new Event("change"));
-        setTimeout(() => {
-          document.getElementById("recordWindowSelect").value = r.windowId;
-        }, 0);
-      }, 0);
-    }
-  } else {
-    state.pendingEdit = null;
-    updateStarsUI(0);
-    if (titleEl) titleEl.textContent = "新建饭菜记录";
-    if (submitBtn) submitBtn.textContent = "保存记录";
-    if (useCurrentWindow && state.nav.windowId) {
-      hierarchy.classList.add("hidden");
-    } else {
-      hierarchy.classList.remove("hidden");
-      populateRecordHierarchy();
-    }
   }
 
-  renderImagePreview();
   openModal("recordModal");
 }
 
@@ -825,7 +695,7 @@ function populateRecordHierarchy() {
   const wSel = document.getElementById("recordWindowSelect");
 
   // 食堂
-  let cHtml = '<option value="">请选择</option>';
+  let cHtml = '<option value="">请选择食堂</option>';
   state.data.canteens.forEach((c) => {
     const sel = state.nav.canteenId === c.id ? "selected" : "";
     cHtml += `<option value="${c.id}" ${sel}>${escapeHtml(c.name)}</option>`;
@@ -887,7 +757,7 @@ document.getElementById("recordImage").addEventListener("change", async (e) => {
     try {
       const dataUrl = await readFileAsDataURL(file);
       // 压缩图片防止 localStorage 溢出
-      const compressed = await compressImage(dataUrl, 1280, 0.85);
+      const compressed = await compressImage(dataUrl, 720, 0.6);
       state.temp.images.push(compressed);
     } catch (err) {
       console.error("图片处理失败:", err);
@@ -963,7 +833,7 @@ document.getElementById("recordForm").addEventListener("submit", (e) => {
   } else {
     windowId = document.getElementById("recordWindowSelect").value;
     if (!windowId) {
-      alert("请选择名称、楼层和窗口");
+      alert("请选择食堂、楼层和窗口");
       return;
     }
   }
@@ -976,42 +846,26 @@ document.getElementById("recordForm").addEventListener("submit", (e) => {
   const rating = Number(document.getElementById("recordRating").value) || 0;
   const review = document.getElementById("recordReview").value.trim();
 
-  if (state.pendingEdit && state.pendingEdit.type === "record") {
-    const idx = state.data.records.findIndex((r) => r.id === state.pendingEdit.id);
-    if (idx >= 0) {
-      state.data.records[idx].windowId = windowId;
-      state.data.records[idx].dishName = dishName;
-      state.data.records[idx].date = date;
-      state.data.records[idx].price = price ? Number(price) : null;
-      state.data.records[idx].rating = rating;
-      state.data.records[idx].images = [...state.temp.images];
-      state.data.records[idx].review = review;
-    }
-    state.pendingEdit = null;
-    saveData();
-    closeModal("recordModal");
-    if (state.nav.level === "window") renderRecords();
-    if (state.nav.windowId !== windowId) {
-      const w = getWindow(windowId);
-      if (w) navigateTo("window", windowId);
-    }
-  } else {
-    const record = {
-      id: uid(),
-      windowId,
-      dishName,
-      date,
-      price: price ? Number(price) : null,
-      rating,
-      images: [...state.temp.images],
-      review,
-      createdAt: Date.now(),
-    };
-    state.data.records.push(record);
-    saveData();
-    closeModal("recordModal");
-    const w = getWindow(windowId);
-    if (w) navigateTo("window", windowId);
+  const record = {
+    id: uid(),
+    windowId,
+    dishName,
+    date,
+    price: price ? Number(price) : null,
+    rating,
+    images: [...state.temp.images],
+    review,
+    createdAt: Date.now(),
+  };
+
+  state.data.records.push(record);
+  saveData();
+  closeModal("recordModal");
+
+  // 导航到对应的窗口视图
+  const w = getWindow(windowId);
+  if (w) {
+    navigateTo("window", windowId);
   }
 });
 
@@ -1068,7 +922,6 @@ function openRecordDetail(recordId) {
     </div>
     <div class="detail-actions">
       <button class="btn btn-ghost" data-close="recordDetailModal">关闭</button>
-      <button class="btn btn-primary" id="editRecordBtn" style="background:#2563eb">✏️ 编辑记录</button>
       <button class="btn btn-danger" id="deleteRecordBtn">删除记录</button>
     </div>
   `;
@@ -1076,10 +929,6 @@ function openRecordDetail(recordId) {
   document.getElementById("deleteRecordBtn").onclick = () => {
     closeModal("recordDetailModal");
     confirmDelete("record", recordId);
-  };
-  document.getElementById("editRecordBtn").onclick = () => {
-    closeModal("recordDetailModal");
-    openRecordModal(false, recordId);
   };
 
   openModal("recordDetailModal");
@@ -1301,6 +1150,14 @@ document.addEventListener("click", (e) => {
 
 document.getElementById("addCanteenBtn").addEventListener("click", openCanteenModal);
 
+// 存储管理按钮
+const _storageBtn = document.getElementById("storageBtn");
+if (_storageBtn) _storageBtn.addEventListener("click", () => {
+  document.getElementById("storageModal")?.classList.remove("hidden");
+  setTimeout(window.__refreshStorageStats, 60);
+});
+setTimeout(window.__refreshStorageStats, 400);
+
 // 数据导入/导出按钮
 document.getElementById("exportDataBtn").addEventListener("click", exportData);
 document.getElementById("importDataBtn").addEventListener("click", () => {
@@ -1316,14 +1173,6 @@ document.getElementById("importFileInput").addEventListener("change", (e) => {
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") closeAllModals();
 });
-
-/* ========== 记录卡片快捷操作 ========== */
-window.__editRecord = function (recordId) {
-  openRecordModal(false, recordId);
-};
-window.__deleteRecordQuick = function (recordId) {
-  confirmDelete("record", recordId);
-};
 
 /* ========== 初始化 ========== */
 function init() {

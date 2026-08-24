@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
@@ -12,6 +12,7 @@
     <header class="header">
       <h1>🍱 饮食记录本</h1>
       <div class="nav-actions">
+        <button id="storageBtn" class="btn btn-ghost" title="查看存储用量、清理压缩图片">💾 存储</button>
         <button id="exportDataBtn" class="btn btn-ghost" title="导出所有饭菜记录为 JSON 文件">📤 导出数据</button>
         <button id="importDataBtn" class="btn btn-ghost" title="从 JSON 文件恢复饭菜记录">📥 导入数据</button>
         <input type="file" id="importFileInput" accept="application/json,.json" hidden />
@@ -22,7 +23,7 @@
 
     <!-- 面包屑导航 -->
     <nav class="breadcrumb" id="breadcrumb">
-      <span class="crumb crumb-root" data-level="root">全部</span>
+      <span class="crumb crumb-root" data-level="root">全部食堂</span>
     </nav>
 
     <!-- 主内容区 -->
@@ -63,13 +64,13 @@
   <div id="canteenModal" class="modal hidden">
     <div class="modal-content">
       <div class="modal-header">
-        <h3 id="canteenModalTitle">新建</h3>
+        <h3>新建食堂</h3>
         <button class="modal-close" data-close="canteenModal">&times;</button>
       </div>
       <form id="canteenForm" class="modal-body">
         <div class="form-group">
-          <label>名称 <span class="required">*</span></label>
-          <input type="text" id="canteenName" required placeholder="如：第一食堂、东门小摊" />
+          <label>食堂名称 <span class="required">*</span></label>
+          <input type="text" id="canteenName" required placeholder="如：第一食堂" />
         </div>
         <div class="form-group">
           <label>楼层 <span class="required">*</span></label>
@@ -116,7 +117,7 @@
   <div id="recordModal" class="modal hidden">
     <div class="modal-content">
       <div class="modal-header">
-        <h3 id="recordModalTitle">新建饭菜记录</h3>
+        <h3>新建饭菜记录</h3>
         <button class="modal-close" data-close="recordModal">&times;</button>
       </div>
       <form id="recordForm" class="modal-body">
@@ -144,19 +145,7 @@
         <div class="form-row">
           <div class="form-group">
             <label>日期 <span class="required">*</span></label>
-            <input type="date" id="recordDate" min="1990-01-01" required />
-            <div class="date-shortcuts" id="dateShortcuts">
-              <button type="button" class="date-chip" data-offset="day" data-value="-1">昨天</button>
-              <button type="button" class="date-chip" data-offset="day" data-value="-3">3天前</button>
-              <button type="button" class="date-chip" data-offset="week" data-value="-1">上周</button>
-              <button type="button" class="date-chip" data-offset="month" data-value="-1">1月前</button>
-              <button type="button" class="date-chip" data-offset="month" data-value="-3">3月前</button>
-              <button type="button" class="date-chip" data-offset="year" data-value="-1">1年前</button>
-              <button type="button" class="date-chip" data-offset="year" data-value="-2">2年前</button>
-              <button type="button" class="date-chip" data-offset="year" data-value="-3">3年前</button>
-              <button type="button" class="date-chip" data-offset="year" data-value="-5">5年前</button>
-              <button type="button" class="date-chip" id="datePickCustom">自定义年份</button>
-            </div>
+            <input type="date" id="recordDate" required />
           </div>
           <div class="form-group">
             <label>价格（元）</label>
@@ -193,7 +182,7 @@
 
         <div class="modal-footer">
           <button type="button" class="btn btn-ghost" data-close="recordModal">取消</button>
-          <button type="submit" id="recordSubmitBtn" class="btn btn-primary">保存记录</button>
+          <button type="submit" class="btn btn-primary">保存记录</button>
         </div>
       </form>
     </div>
@@ -222,6 +211,42 @@
         <div class="modal-footer">
           <button type="button" class="btn btn-ghost" data-close="confirmModal">取消</button>
           <button type="button" id="confirmDeleteBtn" class="btn btn-danger">删除</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 存储管理弹窗 -->
+  <div id="storageModal" class="modal hidden">
+    <div class="modal-content modal-medium">
+      <div class="modal-header">
+        <h3>💾 存储管理</h3>
+        <button class="modal-close" data-close="storageModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="storage-stats">
+          <div class="storage-stat">
+            <div class="storage-stat-label">当前数据大小</div>
+            <div class="storage-stat-value" id="storageUsed">计算中…</div>
+          </div>
+          <div class="storage-stat">
+            <div class="storage-stat-label">localStorage 上限</div>
+            <div class="storage-stat-value" id="storageLimit">约 5 MB</div>
+          </div>
+        </div>
+        <div class="storage-progress-wrap">
+          <div class="storage-progress"><div class="storage-progress-fill" id="storageProgressFill"></div></div>
+          <div class="storage-progress-text" id="storageProgressText">0%</div>
+        </div>
+        <div class="storage-breakdown" id="storageBreakdown"></div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:14px">
+          <button type="button" class="btn btn-secondary" onclick="window.__shrinkAllImages()">🔥 一键瘦身（所有图片缩到 720px / 60% 质量）</button>
+          <button type="button" class="btn btn-ghost" onclick="window.__refreshStorageStats()">🔄 刷新</button>
+        </div>
+        <div style="margin-top:14px;font-size:13px;color:var(--text-secondary);line-height:1.7">
+          💡 浏览器 localStorage 一般只有 ~5MB，上传图片多了很容易存满。
+          「一键瘦身」会把历史所有图片重新压缩，一般能节省 40%~70% 空间。
+          如果瘦身还是不够，建议：<b>① 删除一些旧记录的图片 ② 先点📤导出备份</b>。
         </div>
       </div>
     </div>
