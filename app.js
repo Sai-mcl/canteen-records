@@ -741,7 +741,7 @@ function populateRecordHierarchy() {
   const wSel = document.getElementById("recordWindowSelect");
 
   // 食堂
-  let cHtml = '<option value="">请选择食堂</option>';
+  let cHtml = '<option value="">请选择</option>';
   state.data.canteens.forEach((c) => {
     const sel = state.nav.canteenId === c.id ? "selected" : "";
     cHtml += `<option value="${c.id}" ${sel}>${escapeHtml(c.name)}</option>`;
@@ -879,7 +879,7 @@ document.getElementById("recordForm").addEventListener("submit", (e) => {
   } else {
     windowId = document.getElementById("recordWindowSelect").value;
     if (!windowId) {
-      alert("请选择食堂、楼层和窗口");
+      alert("请选择名称、楼层和窗口");
       return;
     }
   }
