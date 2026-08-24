@@ -352,11 +352,25 @@ body {
   transition: var(--transition);
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
 .record-card:hover {
   box-shadow: var(--shadow-hover);
   transform: translateY(-3px);
+}
+
+.record-card-actions {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 10;
+  opacity: 0;
+  transition: var(--transition);
+}
+
+.record-card:hover .record-card-actions {
+  opacity: 1;
 }
 
 .record-images {

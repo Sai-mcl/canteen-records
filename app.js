@@ -345,6 +345,7 @@ function renderCanteens() {
     html += `
       <div class="card" data-id="${c.id}">
         <div class="card-actions">
+          <button class="btn-icon edit" data-action="edit-canteen" data-id="${c.id}" title="编辑">✏️</button>
           <button class="btn-icon delete" data-action="delete-canteen" data-id="${c.id}" title="删除">🗑️</button>
         </div>
         <div class="card-icon">🏫</div>
@@ -387,6 +388,13 @@ function renderCanteens() {
       confirmDelete("canteen", btn.dataset.id);
     };
   });
+
+  grid.querySelectorAll("[data-action='edit-canteen']").forEach((btn) => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      openCanteenModal(btn.dataset.id);
+    };
+  });
 }
 
 /* ========== 渲染 - 楼层列表 ========== */
@@ -419,6 +427,7 @@ function renderFloors() {
     html += `
       <div class="card" data-id="${f.id}">
         <div class="card-actions">
+          <button class="btn-icon edit" data-action="edit-floor" data-id="${f.id}" title="编辑">✏️</button>
           <button class="btn-icon delete" data-action="delete-floor" data-id="${f.id}" title="删除">🗑️</button>
         </div>
         <div class="card-icon">🪜</div>
@@ -460,6 +469,14 @@ function renderFloors() {
       confirmDelete("floor", btn.dataset.id);
     };
   });
+
+  grid.querySelectorAll("[data-action='edit-floor']").forEach((btn) => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      const f = getFloor(btn.dataset.id);
+      if (f) openAddItemModal("floor", "编辑楼层", "楼层名称", f.id, f.name);
+    };
+  });
 }
 
 /* ========== 渲染 - 窗口列表 ========== */
@@ -481,6 +498,7 @@ function renderWindows() {
     html += `
       <div class="card" data-id="${w.id}">
         <div class="card-actions">
+          <button class="btn-icon edit" data-action="edit-window" data-id="${w.id}" title="编辑">✏️</button>
           <button class="btn-icon delete" data-action="delete-window" data-id="${w.id}" title="删除">🗑️</button>
         </div>
         <div class="card-icon">🪟</div>
@@ -519,6 +537,14 @@ function renderWindows() {
     btn.onclick = (e) => {
       e.stopPropagation();
       confirmDelete("window", btn.dataset.id);
+    };
+  });
+
+  grid.querySelectorAll("[data-action='edit-window']").forEach((btn) => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      const w = getWindow(btn.dataset.id);
+      if (w) openAddItemModal("window", "编辑窗口", "窗口名称", w.id, w.name);
     };
   });
 }
@@ -567,6 +593,10 @@ function renderRecords() {
 
     html += `
       <div class="record-card" data-id="${r.id}">
+        <div class="card-actions record-card-actions">
+          <button class="btn-icon edit" data-action="edit-record" data-id="${r.id}" title="编辑">✏️</button>
+          <button class="btn-icon delete" data-action="delete-record" data-id="${r.id}" title="删除">🗑️</button>
+        </div>
         ${imgHtml}
         <div class="record-info">
           <div class="record-title-row">
@@ -586,49 +616,114 @@ function renderRecords() {
   list.innerHTML = html;
 
   list.querySelectorAll(".record-card").forEach((card) => {
-    card.onclick = () => openRecordDetail(card.dataset.id);
+    card.onclick = (e) => {
+      if (e.target.closest("[data-action]")) return;
+      openRecordDetail(card.dataset.id);
+    };
+  });
+
+  list.querySelectorAll("[data-action='edit-record']").forEach((btn) => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      window.__editRecord(btn.dataset.id);
+    };
+  });
+
+  list.querySelectorAll("[data-action='delete-record']").forEach((btn) => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      confirmDelete("record", btn.dataset.id);
+    };
   });
 }
 
-/* ========== 新建食堂 ========== */
-function openCanteenModal() {
+/* ========== 新建/编辑食堂 ========== */
+let editingCanteenId = null;
+function openCanteenModal(editId) {
+  editingCanteenId = editId || null;
   document.getElementById("canteenForm").reset();
-  document.getElementById("canteenFloors").value = 1;
+
+  const titleEl = document.querySelector("#canteenModal .modal-header h3");
+  if (editId) {
+    const c = getCanteen(editId);
+    if (!c) return;
+    titleEl.textContent = "编辑";
+    document.getElementById("canteenName").value = c.name || "";
+    document.getElementById("canteenNote").value = c.note || "";
+    if (c.floorsCustom) {
+      document.querySelector('input[name="floorMode"][value="custom"]').checked = true;
+      document.getElementById("canteenFloors").classList.add("hidden");
+      document.getElementById("canteenFloorsCustom").classList.remove("hidden");
+      document.getElementById("canteenFloorsCustom").value = c.floorsCustom;
+    } else {
+      document.querySelector('input[name="floorMode"][value="number"]').checked = true;
+      document.getElementById("canteenFloors").classList.remove("hidden");
+      document.getElementById("canteenFloorsCustom").classList.add("hidden");
+      document.getElementById("canteenFloors").value = c.floors || 1;
+    }
+  } else {
+    titleEl.textContent = "新建";
+    document.getElementById("canteenFloors").value = 1;
+    document.querySelector('input[name="floorMode"][value="number"]').checked = true;
+    document.getElementById("canteenFloors").classList.remove("hidden");
+    document.getElementById("canteenFloorsCustom").classList.add("hidden");
+  }
   openModal("canteenModal");
 }
 
 document.getElementById("canteenForm").addEventListener("submit", (e) => {
   e.preventDefault();
   const name = document.getElementById("canteenName").value.trim();
-  const floors = parseInt(document.getElementById("canteenFloors").value) || 1;
-  const note = document.getElementById("canteenNote").value.trim();
-
   if (!name) return;
 
-  const canteen = {
-    id: uid(),
-    name,
-    floors,
-    note,
-    createdAt: Date.now(),
-  };
-  state.data.canteens.push(canteen);
+  const floorMode = document.querySelector('input[name="floorMode"]:checked').value;
+  let floors = 1;
+  let floorsCustom = "";
+  if (floorMode === "custom") {
+    floorsCustom = document.getElementById("canteenFloorsCustom").value.trim();
+    if (!floorsCustom) { alert("请输入自定义楼层文字"); return; }
+  } else {
+    floors = parseInt(document.getElementById("canteenFloors").value) || 1;
+  }
+  const note = document.getElementById("canteenNote").value.trim();
+
+  if (editingCanteenId) {
+    const c = getCanteen(editingCanteenId);
+    if (!c) return;
+    c.name = name;
+    c.note = note;
+    c.floors = floors;
+    c.floorsCustom = floorsCustom;
+    // 如果楼层数增加了且当前没有楼层，自动生成
+    if (floorMode === "number" && c.floors > 0) {
+      const existingFloors = getFloorsByCanteen(c.id);
+      if (existingFloors.length === 0) {
+        for (let i = 1; i <= c.floors; i++) {
+          state.data.floors.push({ id: uid(), canteenId: c.id, name: `${i}楼`, createdAt: Date.now() });
+        }
+      }
+    }
+    editingCanteenId = null;
+  } else {
+    const canteen = { id: uid(), name, floors, floorsCustom, note, createdAt: Date.now() };
+    state.data.canteens.push(canteen);
+  }
   saveData();
   closeModal("canteenModal");
 
-  // 如果在根视图，刷新
-  if (state.nav.level === "root") {
-    renderCanteens();
-  }
+  if (state.nav.level === "root") renderCanteens();
+  else if (state.nav.level === "canteen") renderFloors();
 });
 
-/* ========== 新建楼层/窗口 ========== */
+/* ========== 新建/编辑楼层/窗口 ========== */
 let addItemType = null;
-function openAddItemModal(type, title, label) {
+let editingItemId = null;
+function openAddItemModal(type, title, label, editId, editName) {
   addItemType = type;
+  editingItemId = editId || null;
   document.getElementById("addItemTitle").textContent = title;
   document.getElementById("addItemLabel").innerHTML = label + ' <span class="required">*</span>';
-  document.getElementById("addItemName").value = "";
+  document.getElementById("addItemName").value = editName || "";
   document.getElementById("addItemName").placeholder = label;
   openModal("addItemModal");
   setTimeout(() => document.getElementById("addItemName").focus(), 100);
@@ -640,29 +735,30 @@ document.getElementById("addItemForm").addEventListener("submit", (e) => {
   if (!name || !addItemType) return;
 
   if (addItemType === "floor") {
-    state.data.floors.push({
-      id: uid(),
-      canteenId: state.nav.canteenId,
-      name,
-      createdAt: Date.now(),
-    });
+    if (editingItemId) {
+      const f = getFloor(editingItemId);
+      if (f) { f.name = name; editingItemId = null; }
+    } else {
+      state.data.floors.push({ id: uid(), canteenId: state.nav.canteenId, name, createdAt: Date.now() });
+    }
     saveData();
     closeModal("addItemModal");
     renderFloors();
   } else if (addItemType === "window") {
-    state.data.windows.push({
-      id: uid(),
-      floorId: state.nav.floorId,
-      name,
-      createdAt: Date.now(),
-    });
+    if (editingItemId) {
+      const w = getWindow(editingItemId);
+      if (w) { w.name = name; editingItemId = null; }
+    } else {
+      state.data.windows.push({ id: uid(), floorId: state.nav.floorId, name, createdAt: Date.now() });
+    }
     saveData();
     closeModal("addItemModal");
     renderWindows();
   }
 });
 
-/* ========== 新建记录 ========== */
+/* ========== 新建/编辑记录 ========== */
+let editingRecordId = null;
 document.getElementById("addRecordBtn").addEventListener("click", () => {
   openRecordModal(false);
 });
@@ -670,24 +766,60 @@ document.getElementById("addRecordAtWindowBtn").addEventListener("click", () => 
   openRecordModal(true);
 });
 
-function openRecordModal(useCurrentWindow) {
+function openRecordModal(useCurrentWindow, editId) {
+  editingRecordId = editId || null;
   state.temp.images = [];
   state.temp.rating = 0;
   document.getElementById("recordForm").reset();
-  document.getElementById("recordDate").value = todayStr();
   updateStarsUI(0);
   renderImagePreview();
 
-  const hierarchy = document.getElementById("recordHierarchy");
-  if (useCurrentWindow && state.nav.windowId) {
-    hierarchy.classList.add("hidden");
-  } else {
+  const titleEl = document.querySelector("#recordModal .modal-header h3");
+
+  if (editId) {
+    const r = getRecord(editId);
+    if (!r) return;
+    titleEl.textContent = "编辑记录";
+    document.getElementById("recordDishName").value = r.dishName || "";
+    document.getElementById("recordDate").value = r.date || todayStr();
+    document.getElementById("recordPrice").value = r.price || "";
+    document.getElementById("recordReview").value = r.review || "";
+    state.temp.images = [...(r.images || [])];
+    updateStarsUI(r.rating || 0);
+    renderImagePreview();
+
+    const w = getWindow(r.windowId);
+    const f = w ? getFloor(w.floorId) : null;
+    const c = f ? getCanteen(f.canteenId) : null;
+    const hierarchy = document.getElementById("recordHierarchy");
     hierarchy.classList.remove("hidden");
     populateRecordHierarchy();
+    // 选中记录所属的食堂/楼层/窗口
+    if (c) document.getElementById("recordCanteenSelect").value = c.id;
+    if (w) {
+      document.getElementById("recordCanteenSelect").dispatchEvent(new Event("change"));
+      if (f) document.getElementById("recordFloorSelect").value = f.id;
+      document.getElementById("recordFloorSelect").dispatchEvent(new Event("change"));
+      document.getElementById("recordWindowSelect").value = w.id;
+    }
+  } else {
+    titleEl.textContent = "新建饭菜记录";
+    document.getElementById("recordDate").value = todayStr();
+    const hierarchy = document.getElementById("recordHierarchy");
+    if (useCurrentWindow && state.nav.windowId) {
+      hierarchy.classList.add("hidden");
+    } else {
+      hierarchy.classList.remove("hidden");
+      populateRecordHierarchy();
+    }
   }
 
   openModal("recordModal");
 }
+
+window.__editRecord = function (recordId) {
+  openRecordModal(false, recordId);
+};
 
 function populateRecordHierarchy() {
   const cSel = document.getElementById("recordCanteenSelect");
@@ -846,19 +978,32 @@ document.getElementById("recordForm").addEventListener("submit", (e) => {
   const rating = Number(document.getElementById("recordRating").value) || 0;
   const review = document.getElementById("recordReview").value.trim();
 
-  const record = {
-    id: uid(),
-    windowId,
-    dishName,
-    date,
-    price: price ? Number(price) : null,
-    rating,
-    images: [...state.temp.images],
-    review,
-    createdAt: Date.now(),
-  };
-
-  state.data.records.push(record);
+  if (editingRecordId) {
+    const r = getRecord(editingRecordId);
+    if (r) {
+      r.windowId = windowId;
+      r.dishName = dishName;
+      r.date = date;
+      r.price = price ? Number(price) : null;
+      r.rating = rating;
+      r.images = [...state.temp.images];
+      r.review = review;
+      editingRecordId = null;
+    }
+  } else {
+    const record = {
+      id: uid(),
+      windowId,
+      dishName,
+      date,
+      price: price ? Number(price) : null,
+      rating,
+      images: [...state.temp.images],
+      review,
+      createdAt: Date.now(),
+    };
+    state.data.records.push(record);
+  }
   saveData();
   closeModal("recordModal");
 
@@ -922,6 +1067,7 @@ function openRecordDetail(recordId) {
     </div>
     <div class="detail-actions">
       <button class="btn btn-ghost" data-close="recordDetailModal">关闭</button>
+      <button class="btn btn-secondary" id="editRecordBtn">✏️ 编辑记录</button>
       <button class="btn btn-danger" id="deleteRecordBtn">删除记录</button>
     </div>
   `;
@@ -929,6 +1075,11 @@ function openRecordDetail(recordId) {
   document.getElementById("deleteRecordBtn").onclick = () => {
     closeModal("recordDetailModal");
     confirmDelete("record", recordId);
+  };
+
+  document.getElementById("editRecordBtn").onclick = () => {
+    closeModal("recordDetailModal");
+    window.__editRecord(recordId);
   };
 
   openModal("recordDetailModal");
