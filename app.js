@@ -1,4 +1,4 @@
-﻿/* ========== 食堂饭菜记录本 - 核心逻辑 ========== */
+﻿/* ========== 饮食记录本 - 核心逻辑 ========== */
 
 const STORAGE_KEY = "canteen_records_v1";
 
@@ -252,7 +252,7 @@ function renderCanteens() {
         </div>
         <div class="card-icon">🏫</div>
         <div class="card-title">${escapeHtml(c.name)}</div>
-        <div class="card-desc">${escapeHtml(c.note || "共 " + c.floors + " 层楼")}</div>
+        <div class="card-desc">${escapeHtml(c.note || (c.floorMode === "custom" ? (c.floorLabel || "自定义") : "共 " + c.floors + " 层楼"))}</div>
         <div class="card-meta">
           <div class="meta-item">🏢 ${floors.length} 层</div>
           <div class="meta-item">📝 ${recCount} 条记录</div>
@@ -265,7 +265,7 @@ function renderCanteens() {
   html += `
     <div class="card add-card" data-action="add-floor-quick">
       <div class="add-card-icon">+</div>
-      <div class="add-card-text">新建食堂</div>
+      <div class="add-card-text">新建</div>
     </div>
   `;
 
@@ -307,7 +307,7 @@ function renderFloors() {
 
   const floors = getFloorsByCanteen(canteenId);
   // 如果还没有楼层，按食堂设定的楼层数生成
-  if (floors.length === 0 && c.floors > 0) {
+  if (floors.length === 0 && c.floorMode !== "custom" && c.floors > 0) {
     for (let i = 1; i <= c.floors; i++) {
       const floor = {
         id: uid(),
@@ -518,30 +518,78 @@ function renderRecords() {
 }
 
 /* ========== 新建食堂 ========== */
+function updateFloorTabActive() {
+  document.querySelectorAll(".floor-tab").forEach((tab) => {
+    const radio = tab.querySelector("input");
+    tab.classList.toggle("active", radio.checked);
+  });
+}
+
 function openCanteenModal(editId = null) {
   const form = document.getElementById("canteenForm");
   form.reset();
   state.pendingEdit = editId ? { type: "canteen", id: editId } : null;
   const titleEl = document.getElementById("canteenModalTitle");
+  const numberInput = document.getElementById("canteenFloors");
+  const customInput = document.getElementById("canteenFloorsCustom");
+
   if (editId) {
     const c = getCanteen(editId);
     if (!c) return;
     document.getElementById("canteenName").value = c.name;
-    document.getElementById("canteenFloors").value = c.floors || 1;
     document.getElementById("canteenNote").value = c.note || "";
-    if (titleEl) titleEl.textContent = "编辑食堂";
+    if (c.floorMode === "custom") {
+      document.querySelector('input[name="floorMode"][value="custom"]').checked = true;
+      customInput.value = c.floorLabel || "";
+      numberInput.classList.add("hidden");
+      customInput.classList.remove("hidden");
+    } else {
+      document.querySelector('input[name="floorMode"][value="number"]').checked = true;
+      numberInput.value = c.floors || 1;
+      numberInput.classList.remove("hidden");
+      customInput.classList.add("hidden");
+    }
+    updateFloorTabActive();
+    if (titleEl) titleEl.textContent = "编辑";
   } else {
-    document.getElementById("canteenFloors").value = 1;
-    if (titleEl) titleEl.textContent = "新建食堂";
+    document.querySelector('input[name="floorMode"][value="number"]').checked = true;
+    numberInput.value = 1;
+    numberInput.classList.remove("hidden");
+    customInput.classList.add("hidden");
+    updateFloorTabActive();
+    if (titleEl) titleEl.textContent = "新建";
   }
   openModal("canteenModal");
 }
 
+document.querySelectorAll('input[name="floorMode"]').forEach((radio) => {
+  radio.addEventListener("change", () => {
+    const numberInput = document.getElementById("canteenFloors");
+    const customInput = document.getElementById("canteenFloorsCustom");
+    if (radio.value === "number" && radio.checked) {
+      numberInput.classList.remove("hidden");
+      customInput.classList.add("hidden");
+    } else if (radio.value === "custom" && radio.checked) {
+      numberInput.classList.add("hidden");
+      customInput.classList.remove("hidden");
+    }
+    updateFloorTabActive();
+  });
+});
+
 document.getElementById("canteenForm").addEventListener("submit", (e) => {
   e.preventDefault();
   const name = document.getElementById("canteenName").value.trim();
-  const floors = parseInt(document.getElementById("canteenFloors").value) || 1;
   const note = document.getElementById("canteenNote").value.trim();
+  const floorMode = document.querySelector('input[name="floorMode"]:checked').value;
+
+  let floors = 0;
+  let floorLabel = "";
+  if (floorMode === "number") {
+    floors = parseInt(document.getElementById("canteenFloors").value) || 1;
+  } else {
+    floorLabel = document.getElementById("canteenFloorsCustom").value.trim();
+  }
 
   if (!name) return;
 
@@ -549,15 +597,19 @@ document.getElementById("canteenForm").addEventListener("submit", (e) => {
     const idx = state.data.canteens.findIndex((x) => x.id === state.pendingEdit.id);
     if (idx >= 0) {
       state.data.canteens[idx].name = name;
-      state.data.canteens[idx].floors = floors;
       state.data.canteens[idx].note = note;
-      const existing = getFloorsByCanteen(state.pendingEdit.id);
-      for (let i = existing.length + 1; i <= floors; i++) {
-        state.data.floors.push({ id: uid(), canteenId: state.pendingEdit.id, name: i + "楼", createdAt: Date.now() });
+      state.data.canteens[idx].floorMode = floorMode;
+      state.data.canteens[idx].floors = floors;
+      state.data.canteens[idx].floorLabel = floorLabel;
+      if (floorMode === "number") {
+        const existing = getFloorsByCanteen(state.pendingEdit.id);
+        for (let i = existing.length + 1; i <= floors; i++) {
+          state.data.floors.push({ id: uid(), canteenId: state.pendingEdit.id, name: i + "楼", createdAt: Date.now() });
+        }
       }
     }
   } else {
-    state.data.canteens.push({ id: uid(), name, floors, note, createdAt: Date.now() });
+    state.data.canteens.push({ id: uid(), name, floors, floorMode, floorLabel, note, createdAt: Date.now() });
   }
   state.pendingEdit = null;
   saveData();
