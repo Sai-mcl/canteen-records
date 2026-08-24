@@ -96,6 +96,89 @@ function getStars(count) {
   return "★".repeat(n) + "☆".repeat(5 - n);
 }
 
+function addDaysToDate(dateStr, days) {
+  const d = dateStr ? new Date(dateStr) : new Date();
+  d.setDate(d.getDate() + days);
+  return formatDate(d);
+}
+function addMonthsToDate(dateStr, months) {
+  const d = dateStr ? new Date(dateStr) : new Date();
+  const day = d.getDate();
+  d.setDate(1);
+  d.setMonth(d.getMonth() + months);
+  const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+  d.setDate(Math.min(day, lastDay));
+  return formatDate(d);
+}
+function addYearsToDate(dateStr, years) {
+  const d = dateStr ? new Date(dateStr) : new Date();
+  const day = d.getDate();
+  d.setFullYear(d.getFullYear() + years);
+  const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+  d.setDate(Math.min(day, lastDay));
+  return formatDate(d);
+}
+
+let _dateShortcutsBound = false;
+function bindDateShortcuts() {
+  if (_dateShortcutsBound) return;
+  const wrap = document.getElementById("dateShortcuts");
+  if (!wrap) return;
+  _dateShortcutsBound = true;
+  wrap.querySelectorAll(".date-chip").forEach((btn) => {
+    if (btn.id === "datePickCustom") {
+      btn.addEventListener("click", () => {
+        const cur = document.getElementById("recordDate").value || todayStr();
+        const curYear = cur.split("-")[0];
+        const res = prompt("请输入年份（如 2018）", curYear);
+        if (!res) return;
+        const y = parseInt(res);
+        if (!y || y < 1900 || y > 2100) { alert("年份需在 1900 ~ 2100 之间"); return; }
+        const parts = cur.split("-");
+        const m = parts[1] || "01";
+        let dd = parts[2] || "01";
+        const lastDay = new Date(y, parseInt(m), 0).getDate();
+        if (parseInt(dd) > lastDay) dd = String(lastDay).padStart(2, "0");
+        document.getElementById("recordDate").value = `${y}-${m}-${dd}`;
+      });
+      return;
+    }
+    btn.addEventListener("click", () => {
+      const offset = btn.dataset.offset;
+      const value = parseInt(btn.dataset.value) || 0;
+      const cur = document.getElementById("recordDate").value || todayStr();
+      if (offset === "day") document.getElementById("recordDate").value = addDaysToDate(cur, value);
+      else if (offset === "week") document.getElementById("recordDate").value = addDaysToDate(cur, value * 7);
+      else if (offset === "month") document.getElementById("recordDate").value = addMonthsToDate(cur, value);
+      else if (offset === "year") document.getElementById("recordDate").value = addYearsToDate(cur, value);
+    });
+  });
+}
+
+function addDaysToDate(dateStr, days) {
+  const d = dateStr ? new Date(dateStr) : new Date();
+  d.setDate(d.getDate() + days);
+  return formatDate(d);
+}
+function addMonthsToDate(dateStr, months) {
+  const d = dateStr ? new Date(dateStr) : new Date();
+  const day = d.getDate();
+  d.setDate(1);
+  d.setMonth(d.getMonth() + months);
+  const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+  d.setDate(Math.min(day, lastDay));
+  return formatDate(d);
+}
+function addYearsToDate(dateStr, years) {
+  const d = dateStr ? new Date(dateStr) : new Date();
+  const day = d.getDate();
+  d.setFullYear(d.getFullYear() + years);
+  const lastDay = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+  d.setDate(Math.min(day, lastDay));
+  return formatDate(d);
+}
+
+
 function getCanteen(id) {
   return state.data.canteens.find((c) => c.id === id);
 }
@@ -685,6 +768,7 @@ function openRecordModal(useCurrentWindow, editId = null) {
   state.temp.rating = 0;
   document.getElementById("recordForm").reset();
   document.getElementById("recordDate").value = todayStr();
+  bindDateShortcuts();
 
   const titleEl = document.getElementById("recordModalTitle");
   const submitBtn = document.getElementById("recordSubmitBtn");

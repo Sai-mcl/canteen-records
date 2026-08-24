@@ -890,3 +890,28 @@ body {
   margin: 0;
   cursor: pointer;
 }
+/* ========== 日期快捷按钮 ========== */
+.date-shortcuts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.date-chip {
+  font-size: 12px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: var(--transition);
+  line-height: 1;
+}
+
+.date-chip:hover {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--primary);
+}
