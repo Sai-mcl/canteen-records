@@ -155,7 +155,7 @@ function showView(name) {
 function updateBreadcrumb() {
   const bc = document.getElementById("breadcrumb");
   const items = [
-    { level: "root", label: "全部食堂", id: null },
+    { level: "root", label: "全部", id: null },
   ];
 
   if (state.nav.canteenId) {
