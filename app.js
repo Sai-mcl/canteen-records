@@ -29,53 +29,60 @@ const state = {
   pendingDelete: null, // { type, id }
 };
 
-/* ========== 存储工具 ========== */
-function loadData() {
+/* ========== 存储工具（后端模式） ========== */
+async function loadData() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      state.data = JSON.parse(raw);
+    const res = await fetch(SYNC_SERVER_URL + "/api/data");
+    if (!res.ok) throw new Error("服务器返回 " + res.status);
+    const payload = await res.json();
+    if (payload && payload.canteens) {
+      state.data = payload;
+    } else if (payload && payload.data && payload.data.canteens) {
+      state.data = payload.data;
     }
+    // 迁移：如果服务器没数据但 localStorage 有，迁移过去
+    if ((!state.data.canteens || state.data.canteens.length === 0)) {
+      const local = localStorage.getItem(STORAGE_KEY);
+      if (local) {
+        console.log("[迁移] 从 localStorage 迁移数据到服务器…");
+        state.data = JSON.parse(local);
+        await saveData({ silent: true });
+        localStorage.removeItem(STORAGE_KEY);
+        console.log("[迁移] 完成，已清除 localStorage");
+      }
+    }
+    updateServerStatus(true);
   } catch (e) {
-    console.error("加载数据失败:", e);
+    console.error("连接服务器失败:", e);
+    // 降级：从 localStorage 加载
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) state.data = JSON.parse(raw);
+    } catch (e2) { console.error("localStorage 也失败:", e2); }
+    updateServerStatus(false);
   }
 }
 
 function saveData(options = {}) {
-  const { silent = false, _retrying = false } = options;
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state.data));
-    // 异步同步到本地服务器（失败静默忽略）
-    syncToServer();
-  } catch (e) {
-    const msg = (e && e.message) ? e.message : String(e);
-    const isQuota = /quota/i.test(msg) || /QuotaExceeded/i.test(msg) || /setItem/.test(msg);
-    if (isQuota && !_retrying) {
-      if (!silent) alert("⚠️ 浏览器存储空间已满，正在自动瘦身压缩图片，请稍候…");
-      (async () => {
-        try {
-          const freed = await window.__shrinkAllImages(true);
-          saveData({ silent: true, _retrying: true });
-          window.__refreshStorageStats();
-          if (!silent) {
-            setTimeout(() => {
-              alert(`✅ 自动瘦身完成，节省约 ${formatBytes(freed)}。\n如果还是报存满，打开顶部「💾 存储」按钮手动管理：删除一些旧记录图片，或先📤导出备份。`);
-              const m = document.getElementById("storageModal");
-              if (m) m.classList.remove("hidden");
-            }, 80);
-          }
-        } catch (se) {
-          if (!silent) alert("自动瘦身失败：" + (se.message || se) + "\n请点顶部「💾 存储」按钮手动处理，或先 📤 导出数据做备份。");
-          window.__refreshStorageStats();
-          const m = document.getElementById("storageModal");
-          if (m) m.classList.remove("hidden");
-        }
-      })();
-      return;
+  const { silent = false } = options;
+  if (syncTimer) clearTimeout(syncTimer);
+  syncTimer = setTimeout(async () => {
+    try {
+      const res = await fetch(SYNC_SERVER_URL + "/api/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(state.data),
+      });
+      if (!res.ok) throw new Error("服务器返回 " + res.status);
+      updateServerStatus(true);
+    } catch (e) {
+      console.error("[保存] 服务器连接失败，降级到 localStorage:", e);
+      updateServerStatus(false);
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state.data)); } catch (e2) {
+        if (!silent) alert("⚠️ 服务器未启动且 localStorage 已满！\n请先启动 sync-server：\ncd D:\\trae\\work\\canteen-records\\nnode sync-server.js");
+      }
     }
-    console.error("保存数据失败:", e);
-    if (!silent) alert("保存数据失败：" + msg);
-  }
+  }, 300);
 }
 
 function formatBytes(b) {
@@ -151,24 +158,20 @@ window.__shrinkAllImages = async function (returnBytesSaved = false, maxW = 720,
   return saved;
 };
 
-// 同步数据到本地服务器（用于自动备份）
+// 服务器状态指示
 let syncTimer = null;
-function syncToServer() {
-  // 防抖：500ms 内多次调用只发一次请求
-  if (syncTimer) clearTimeout(syncTimer);
-  syncTimer = setTimeout(async () => {
-    try {
-      await fetch(SYNC_SERVER_URL + "/save", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(state.data),
-      });
-      console.log("[同步] 数据已同步到本地服务器");
-    } catch (e) {
-      // 服务器没开或连接失败，静默忽略
-      console.log("[同步] 本地服务器未运行，跳过同步");
-    }
-  }, 500);
+let serverOnline = false;
+function updateServerStatus(online) {
+  serverOnline = online;
+  const indicator = document.getElementById("serverStatus");
+  if (!indicator) return;
+  if (online) {
+    indicator.textContent = "🟢 已连接服务器";
+    indicator.className = "server-status online";
+  } else {
+    indicator.textContent = "🔴 服务器未连接（降级 localStorage）";
+    indicator.className = "server-status offline";
+  }
 }
 
 function uid() {
@@ -882,17 +885,34 @@ document.querySelectorAll("#starRating span").forEach((s) => {
   });
 });
 
-/* ---------- 图片上传 ---------- */
+/* ---------- 图片上传（上传到服务器） ---------- */
 document.getElementById("recordImage").addEventListener("change", async (e) => {
   const files = Array.from(e.target.files);
   for (const file of files) {
     try {
       const dataUrl = await readFileAsDataURL(file);
-      // 压缩图片防止 localStorage 溢出
-      const compressed = await compressImage(dataUrl, 720, 0.6);
-      state.temp.images.push(compressed);
+      // 压缩图片
+      const compressed = await compressImage(dataUrl, 1280, 0.85);
+      // 上传到服务器，获取 URL
+      if (serverOnline) {
+        const res = await fetch(SYNC_SERVER_URL + "/api/upload", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ image: compressed }),
+        });
+        const result = await res.json();
+        if (result.ok && result.url) {
+          state.temp.images.push(result.url);
+        } else {
+          throw new Error(result.error || "上传失败");
+        }
+      } else {
+        // 服务器没开，降级用 base64
+        state.temp.images.push(compressed);
+      }
     } catch (err) {
       console.error("图片处理失败:", err);
+      alert("图片上传失败: " + err.message);
     }
   }
   renderImagePreview();
@@ -1335,8 +1355,8 @@ document.addEventListener("keydown", (e) => {
 });
 
 /* ========== 初始化 ========== */
-function init() {
-  loadData();
+async function init() {
+  await loadData();
   navigateTo("root");
 }
 

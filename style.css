@@ -49,6 +49,8 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
   margin-bottom: 24px;
   padding-bottom: 20px;
   border-bottom: 1px solid var(--border);
@@ -58,6 +60,29 @@ body {
   font-size: 28px;
   font-weight: 700;
   color: var(--text);
+}
+
+.server-status {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.server-status.online {
+  color: var(--success);
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.server-status.offline {
+  color: var(--danger);
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.server-status.connecting {
+  color: var(--warning);
+  background: rgba(245, 158, 11, 0.1);
 }
 
 .nav-actions {
