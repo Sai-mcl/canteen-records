@@ -806,7 +806,7 @@ function openRecordModal(useCurrentWindow, editId) {
       document.getElementById("recordWindowSelect").value = w.id;
     }
   } else {
-    titleEl.textContent = "新建饭菜记录";
+    titleEl.textContent = "新建记录";
     document.getElementById("recordDate").value = todayStr();
     const hierarchy = document.getElementById("recordHierarchy");
     if (useCurrentWindow && state.nav.windowId) {
@@ -1112,16 +1112,16 @@ function confirmDelete(type, id) {
   let text = "确定要删除吗？此操作不可撤销。";
   if (type === "canteen") {
     const c = getCanteen(id);
-    text = `确定要删除食堂「${c?.name || ""}」吗？该食堂下的所有楼层、窗口和饭菜记录都会被删除，此操作不可撤销！`;
+    text = `确定要删除「${c?.name || ""}」吗？该目录下的所有楼层、窗口和饭菜记录都会被删除，此操作不可撤销！`;
   } else if (type === "floor") {
     const f = getFloor(id);
-    text = `确定要删除楼层「${f?.name || ""}」吗？该楼层下的所有窗口和记录都会被删除！`;
+    text = `确定要删除「${f?.name || ""}」吗？该目录下的所有窗口和记录都会被删除！`;
   } else if (type === "window") {
     const w = getWindow(id);
-    text = `确定要删除窗口「${w?.name || ""}」吗？该窗口下所有饭菜记录都会被删除！`;
+    text = `确定要删除「${w?.name || ""}」吗？该目录下所有记录都会被删除！`;
   } else if (type === "record") {
     const r = getRecord(id);
-    text = `确定要删除饭菜记录「${r?.dishName || ""}」吗？`;
+    text = `确定要删除记录「${r?.dishName || ""}」吗？`;
   }
   msg.textContent = text;
   openModal("confirmModal");
