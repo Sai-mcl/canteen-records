@@ -363,7 +363,7 @@ function renderCanteens() {
   html += `
     <div class="card add-card" data-action="add-floor-quick">
       <div class="add-card-icon">+</div>
-      <div class="add-card-text">新建</div>
+      <div class="add-card-text">新建食堂</div>
     </div>
   `;
 
@@ -444,7 +444,7 @@ function renderFloors() {
   html += `
     <div class="card add-card" data-action="add-floor">
       <div class="add-card-icon">+</div>
-      <div class="add-card-text">添加</div>
+      <div class="add-card-text">添加楼层</div>
     </div>
   `;
 
@@ -452,7 +452,7 @@ function renderFloors() {
 
   grid.querySelectorAll(".card").forEach((card) => {
     if (card.dataset.action === "add-floor") {
-      card.onclick = () => openAddItemModal("floor", "新建", "名称");
+      card.onclick = () => openAddItemModal("floor", "新建楼层", "楼层名称（如：3楼）");
     } else if (card.dataset.action === "delete-floor") {
       // handled below
     } else {
@@ -474,7 +474,7 @@ function renderFloors() {
     btn.onclick = (e) => {
       e.stopPropagation();
       const f = getFloor(btn.dataset.id);
-      if (f) openAddItemModal("floor", "编辑", "名称", f.id, f.name);
+      if (f) openAddItemModal("floor", "编辑楼层", "楼层名称", f.id, f.name);
     };
   });
 }
@@ -514,7 +514,7 @@ function renderWindows() {
   html += `
     <div class="card add-card" data-action="add-window">
       <div class="add-card-icon">+</div>
-      <div class="add-card-text">添加</div>
+      <div class="add-card-text">添加窗口</div>
     </div>
   `;
 
@@ -522,7 +522,7 @@ function renderWindows() {
 
   grid.querySelectorAll(".card").forEach((card) => {
     if (card.dataset.action === "add-window") {
-      card.onclick = () => openAddItemModal("window", "新建", "名称");
+      card.onclick = () => openAddItemModal("window", "新建窗口", "窗口名称（如：黄焖鸡窗口）");
     } else if (card.dataset.action === "delete-window") {
       // handled below
     } else {
@@ -544,7 +544,7 @@ function renderWindows() {
     btn.onclick = (e) => {
       e.stopPropagation();
       const w = getWindow(btn.dataset.id);
-      if (w) openAddItemModal("window", "编辑", "名称", w.id, w.name);
+      if (w) openAddItemModal("window", "编辑窗口", "窗口名称", w.id, w.name);
     };
   });
 }
@@ -827,7 +827,7 @@ function populateRecordHierarchy() {
   const wSel = document.getElementById("recordWindowSelect");
 
   // 食堂
-  let cHtml = '<option value="">请选择</option>';
+  let cHtml = '<option value="">请选择食堂</option>';
   state.data.canteens.forEach((c) => {
     const sel = state.nav.canteenId === c.id ? "selected" : "";
     cHtml += `<option value="${c.id}" ${sel}>${escapeHtml(c.name)}</option>`;
@@ -836,7 +836,7 @@ function populateRecordHierarchy() {
 
   const updateFloors = () => {
     const cid = cSel.value;
-    let fHtml = '<option value="">请选择</option>';
+    let fHtml = '<option value="">请选择楼层</option>';
     if (cid) {
       getFloorsByCanteen(cid).forEach((f) => {
         const sel = state.nav.floorId === f.id ? "selected" : "";
@@ -849,7 +849,7 @@ function populateRecordHierarchy() {
 
   const updateWindows = () => {
     const fid = fSel.value;
-    let wHtml = '<option value="">请选择</option>';
+    let wHtml = '<option value="">请选择窗口</option>';
     if (fid) {
       getWindowsByFloor(fid).forEach((w) => {
         const sel = state.nav.windowId === w.id ? "selected" : "";
@@ -1300,6 +1300,15 @@ document.addEventListener("click", (e) => {
 });
 
 document.getElementById("addCanteenBtn").addEventListener("click", openCanteenModal);
+
+// 楼层模式切换：楼层数 ↔ 自定义
+document.querySelectorAll('input[name="floorMode"]').forEach((radio) => {
+  radio.addEventListener("change", () => {
+    const isCustom = radio.value === "custom" && radio.checked;
+    document.getElementById("canteenFloors").classList.toggle("hidden", isCustom);
+    document.getElementById("canteenFloorsCustom").classList.toggle("hidden", !isCustom);
+  });
+});
 
 // 存储管理按钮
 const _storageBtn = document.getElementById("storageBtn");
