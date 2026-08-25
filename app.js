@@ -366,7 +366,7 @@ function renderCanteens() {
   html += `
     <div class="card add-card" data-action="add-floor-quick">
       <div class="add-card-icon">+</div>
-      <div class="add-card-text">新建食堂</div>
+      <div class="add-card-text">新建</div>
     </div>
   `;
 
@@ -447,7 +447,7 @@ function renderFloors() {
   html += `
     <div class="card add-card" data-action="add-floor">
       <div class="add-card-icon">+</div>
-      <div class="add-card-text">添加楼层</div>
+      <div class="add-card-text">添加</div>
     </div>
   `;
 
@@ -455,7 +455,7 @@ function renderFloors() {
 
   grid.querySelectorAll(".card").forEach((card) => {
     if (card.dataset.action === "add-floor") {
-      card.onclick = () => openAddItemModal("floor", "新建楼层", "楼层名称（如：3楼）");
+      card.onclick = () => openAddItemModal("floor", "新建", "名称");
     } else if (card.dataset.action === "delete-floor") {
       // handled below
     } else {
@@ -477,7 +477,7 @@ function renderFloors() {
     btn.onclick = (e) => {
       e.stopPropagation();
       const f = getFloor(btn.dataset.id);
-      if (f) openAddItemModal("floor", "编辑楼层", "楼层名称", f.id, f.name);
+      if (f) openAddItemModal("floor", "编辑", "名称", f.id, f.name);
     };
   });
 }
@@ -517,7 +517,7 @@ function renderWindows() {
   html += `
     <div class="card add-card" data-action="add-window">
       <div class="add-card-icon">+</div>
-      <div class="add-card-text">添加窗口</div>
+      <div class="add-card-text">添加</div>
     </div>
   `;
 
@@ -525,7 +525,7 @@ function renderWindows() {
 
   grid.querySelectorAll(".card").forEach((card) => {
     if (card.dataset.action === "add-window") {
-      card.onclick = () => openAddItemModal("window", "新建窗口", "窗口名称（如：黄焖鸡窗口）");
+      card.onclick = () => openAddItemModal("window", "新建", "名称");
     } else if (card.dataset.action === "delete-window") {
       // handled below
     } else {
@@ -547,7 +547,7 @@ function renderWindows() {
     btn.onclick = (e) => {
       e.stopPropagation();
       const w = getWindow(btn.dataset.id);
-      if (w) openAddItemModal("window", "编辑窗口", "窗口名称", w.id, w.name);
+      if (w) openAddItemModal("window", "编辑", "名称", w.id, w.name);
     };
   });
 }
