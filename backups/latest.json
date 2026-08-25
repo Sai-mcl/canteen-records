@@ -1,12 +1,12 @@
 {
   "version": 1,
-  "exportedAt": "2026-08-25T06:06:38.754Z",
+  "exportedAt": "2026-08-25T10:14:43.410Z",
   "app": "canteen_records",
   "stats": {
     "canteens": 6,
-    "floors": 9,
-    "windows": 27,
-    "records": 31
+    "floors": 11,
+    "windows": 58,
+    "records": 92
   },
   "data": {
     "canteens": [
@@ -19,12 +19,13 @@
       },
       {
         "id": "mt1bqo9d3jvdx5",
-        "name": "外卖",
-        "floors": 0,
+        "name": "外卖或堂食",
+        "floors": 1,
         "note": "",
         "createdAt": 1787218484305,
         "floorMode": "custom",
-        "floorLabel": "外卖"
+        "floorLabel": "外卖",
+        "floorsCustom": ""
       },
       {
         "id": "mt6na0m1idgjz8",
@@ -112,6 +113,18 @@
         "canteenId": "mt83rlxj11yj2h",
         "name": "1楼",
         "createdAt": 1787628366935
+      },
+      {
+        "id": "mt8dp5ejexp33i",
+        "canteenId": "mt1bqo9d3jvdx5",
+        "name": "堂食",
+        "createdAt": 1787645035675
+      },
+      {
+        "id": "mt8f6cak9j7u43",
+        "canteenId": "mt6na0m1idgjz8",
+        "name": "果茶",
+        "createdAt": 1787647517372
       }
     ],
     "windows": [
@@ -276,6 +289,192 @@
         "floorId": "mt723yafbxk3aq",
         "name": "馬伍旺饮料厂",
         "createdAt": 1787637614441
+      },
+      {
+        "id": "mt8cxqmmtnfg23",
+        "floorId": "mt6na1a9fo9el5",
+        "name": "七鲜",
+        "createdAt": 1787643756814
+      },
+      {
+        "id": "mt8d34cdpsigm8",
+        "floorId": "mt720avzjg84mc",
+        "name": "沪上阿姨",
+        "createdAt": 1787644007869
+      },
+      {
+        "id": "mt8dbmx7mfqetf",
+        "floorId": "mt723yafbxk3aq",
+        "name": "百分茶",
+        "createdAt": 1787644405195
+      },
+      {
+        "id": "mt8def9n192ocm",
+        "floorId": "mt0xf1tx06r518",
+        "name": "五谷鱼粉",
+        "createdAt": 1787644535243
+      },
+      {
+        "id": "mt8dhef8qd48gy",
+        "floorId": "mt1bqpjsj4c8hz",
+        "name": "东北冷面",
+        "createdAt": 1787644674116
+      },
+      {
+        "id": "mt8dp924fvzlif",
+        "floorId": "mt8dp5ejexp33i",
+        "name": "星巴克",
+        "createdAt": 1787645040412
+      },
+      {
+        "id": "mt8dulduptfwwk",
+        "floorId": "mt720avzjg84mc",
+        "name": "101park",
+        "createdAt": 1787645289666
+      },
+      {
+        "id": "mt8eoo4nm26ffk",
+        "floorId": "mt723yafbxk3aq",
+        "name": "茶话弄",
+        "createdAt": 1787646692903
+      },
+      {
+        "id": "mt8esogpkrbho8",
+        "floorId": "mt720avzjg84mc",
+        "name": "福万斯",
+        "createdAt": 1787646879961
+      },
+      {
+        "id": "mt8f4gz8vxy2md",
+        "floorId": "mt723yafbxk3aq",
+        "name": "柠檬森林",
+        "createdAt": 1787647430132
+      },
+      {
+        "id": "mt8f6l9u0d7z9z",
+        "floorId": "mt8f6cak9j7u43",
+        "name": "狼人杀",
+        "createdAt": 1787647529010
+      },
+      {
+        "id": "mt8fi3mcjms93m",
+        "floorId": "mt6na1a9fo9el5",
+        "name": "蒙牛",
+        "createdAt": 1787648066004
+      },
+      {
+        "id": "mt8fqp8tsoy858",
+        "floorId": "mt6na1a9fo9el5",
+        "name": "百事",
+        "createdAt": 1787648467277
+      },
+      {
+        "id": "mt8ft476j14uyn",
+        "floorId": "mt6na1a9fo9el5",
+        "name": "自在水",
+        "createdAt": 1787648579970
+      },
+      {
+        "id": "mt8fuqhlh3sfvl",
+        "floorId": "mt6na1a9fo9el5",
+        "name": "康师傅",
+        "createdAt": 1787648655513
+      },
+      {
+        "id": "mt8fwie0o72qet",
+        "floorId": "mt6na1a9fo9el5",
+        "name": "光明",
+        "createdAt": 1787648738328
+      },
+      {
+        "id": "mt8fztlohqbrsy",
+        "floorId": "mt720avzjg84mc",
+        "name": "星巴克",
+        "createdAt": 1787648892828
+      },
+      {
+        "id": "mt8g4o8z7tfy8n",
+        "floorId": "mt8f6cak9j7u43",
+        "name": "林里",
+        "createdAt": 1787649119171
+      },
+      {
+        "id": "mt8g8zdtbdgn6a",
+        "floorId": "mt6na1a9fo9el5",
+        "name": "酷酷西姆",
+        "createdAt": 1787649320225
+      },
+      {
+        "id": "mt8gdl54xqsmln",
+        "floorId": "mt6na1a9fo9el5",
+        "name": "佳果源",
+        "createdAt": 1787649535048
+      },
+      {
+        "id": "mt8gib215cuizw",
+        "floorId": "mt6na1a9fo9el5",
+        "name": "依云",
+        "createdAt": 1787649755257
+      },
+      {
+        "id": "mt8gpfvipedrh5",
+        "floorId": "mt723yafbxk3aq",
+        "name": "Coco",
+        "createdAt": 1787650088094
+      },
+      {
+        "id": "mt8h026820rnlh",
+        "floorId": "mt6na1a9fo9el5",
+        "name": "百乐皇禧",
+        "createdAt": 1787650583553
+      },
+      {
+        "id": "mt8h4ewpc27e3o",
+        "floorId": "mt720avzjg84mc",
+        "name": "诺思微",
+        "createdAt": 1787650786681
+      },
+      {
+        "id": "mt8hixfjj0slhh",
+        "floorId": "mt6na1a9fo9el5",
+        "name": "蘭芳園",
+        "createdAt": 1787651463871
+      },
+      {
+        "id": "mt8hkmi9rf3vd3",
+        "floorId": "mt723yafbxk3aq",
+        "name": "一点点",
+        "createdAt": 1787651543025
+      },
+      {
+        "id": "mt8hozaxcjulih",
+        "floorId": "mt723yafbxk3aq",
+        "name": "茶百道",
+        "createdAt": 1787651746233
+      },
+      {
+        "id": "mt8hrkda8dgj7a",
+        "floorId": "mt6na1a9fo9el5",
+        "name": "丽塔",
+        "createdAt": 1787651866846
+      },
+      {
+        "id": "mt8hu30mrm7lqj",
+        "floorId": "mt723yafbxk3aq",
+        "name": "益禾堂",
+        "createdAt": 1787651984326
+      },
+      {
+        "id": "mt8i0zi8dcwbov",
+        "floorId": "mt6na1a9fo9el5",
+        "name": "滢爽",
+        "createdAt": 1787652306368
+      },
+      {
+        "id": "mt8i5t9ils4izz",
+        "floorId": "mt720avzjg84mc",
+        "name": "浪bar",
+        "createdAt": 1787652531558
       }
     ],
     "records": [
@@ -683,6 +882,803 @@
         ],
         "review": "为啥不点黑糖珍珠奶茶！难道是因为热量嘛！！T T",
         "createdAt": 1787637937400
+      },
+      {
+        "id": "mt89riswzc85zt",
+        "windowId": "mt858ncrnj5ljf",
+        "dishName": "忘记了。。。",
+        "date": "2024-08-16",
+        "price": null,
+        "rating": 5,
+        "images": [
+          "http://localhost:18923/images/1787638337431-nqwsdi.jpg"
+        ],
+        "review": "可能还是老样子?额外加了西米?（居然是在这家公司喝的最后一杯奶茶）",
+        "createdAt": 1787638427888
+      },
+      {
+        "id": "mt8d0cp9n5sgjk",
+        "windowId": "mt8cxqmmtnfg23",
+        "dishName": "吨吨柠檬水风味饮料",
+        "date": "2026-08-22",
+        "price": null,
+        "rating": 1,
+        "images": [
+          "http://localhost:18923/images/1787643820113-l8sgl1.jpg"
+        ],
+        "review": "难喝的要鼠，后调一股药味，一颗星完全是给它无糖配方的，要是这么难喝还有热量真的是要天打雷劈！！！",
+        "createdAt": 1787643878733
+      },
+      {
+        "id": "mt8d4r255td25n",
+        "windowId": "mt8d34cdpsigm8",
+        "dishName": "生椰拿铁咖啡",
+        "date": "2024-03-01",
+        "price": null,
+        "rating": 4,
+        "images": [
+          "http://localhost:18923/images/1787644013897-enokea.jpg"
+        ],
+        "review": "看样子应该是沪上阿姨把(◐‿◑)",
+        "createdAt": 1787644083965
+      },
+      {
+        "id": "mt8dapqzfgpklc",
+        "windowId": "mt858ncrnj5ljf",
+        "dishName": "真乳茶?",
+        "date": "2024-03-10",
+        "price": null,
+        "rating": 1,
+        "images": [
+          "http://localhost:18923/images/1787644130459-5xsf9o.jpg"
+        ],
+        "review": "这段回忆实在是太不好了，导致我看到那段时间的照片都会条件反射的没胃口......痛苦原来是绵延不绝的，不知道再过几年会不会好一些。其实我对这段感情早已经放下了，但看到和他在一起吃的饭和喝的饮料都会被带回到当时的那个场景，并且感同身受当时的心情...(｡ ́︿  ̀｡ )",
+        "createdAt": 1787644362203
+      },
+      {
+        "id": "mt8dcnuv9tv01c",
+        "windowId": "mt8dbmx7mfqetf",
+        "dishName": "桂落满陇",
+        "date": "2026-08-25",
+        "price": null,
+        "rating": 4,
+        "images": [
+          "http://localhost:18923/images/1787644408910-uah5wb.jpg"
+        ],
+        "review": "看名字应该是桂花和哈密瓜味的？",
+        "createdAt": 1787644453063
+      },
+      {
+        "id": "mt8dgjqsy2d8mz",
+        "windowId": "mt8def9n192ocm",
+        "dishName": "金汤鱼粉",
+        "date": "2026-08-25",
+        "price": 12,
+        "rating": 5,
+        "images": [
+          "http://localhost:18923/images/1787644540591-zjx7as.jpg"
+        ],
+        "review": "第一次吃五谷鱼粉是5带我吃的，百度云里还存了当时吃这个鱼粉时的照片。如果她当时和那任男朋友快刀斩乱麻的分手的话，我们应该不会像现在这样别扭。",
+        "createdAt": 1787644634356
+      },
+      {
+        "id": "mt8dkcarw8cqpa",
+        "windowId": "mt8dhef8qd48gy",
+        "dishName": "荞麦冷面",
+        "date": "2026-08-25",
+        "price": null,
+        "rating": 5,
+        "images": [
+          "http://localhost:18923/images/1787644678085-kda9t6.jpg"
+        ],
+        "review": "夏天就该吃冷面！虽然我并不是很爱吃（主要是吃不惯甜的面条样的东西，毕竟是陕西人......吃甜面条是真的背叛祖籍了，但这家可以选择咸口，完美！）٩(˃̶͈̀௰˂̶͈́)و",
+        "createdAt": 1787644811331
+      },
+      {
+        "id": "mt8dny7nbj09wa",
+        "windowId": "mt1gcyelo5k327",
+        "dishName": "小白菜+圆白菜+西葫芦木耳炒肉片",
+        "date": "2026-08-24",
+        "price": 7,
+        "rating": 5,
+        "images": [
+          "http://localhost:18923/images/1787644915173-q4j664.jpg"
+        ],
+        "review": "yummy yummy，主要是经济实惠",
+        "createdAt": 1787644979699
+      },
+      {
+        "id": "mt8droy48y34ce",
+        "windowId": "mt8dp924fvzlif",
+        "dishName": "金沙麻薯酥皮包",
+        "date": "2026-08-24",
+        "price": null,
+        "rating": 5,
+        "images": [
+          "http://localhost:18923/images/1787645046645-t571f2.jpg"
+        ],
+        "review": "很好吃，咸蛋黄味很浓郁，店员还帮我加热了，说里面的麻薯可以拉丝，但可能是我拎了一路导致凉了一些，所以并没有拉丝。本来想选巧克力麦芬的，但是我潜意识里明白，我喜欢吃的热量都不低，走路上一搜，果然，一个巧克力麦芬607卡....",
+        "createdAt": 1787645154316
+      },
+      {
+        "id": "mt8dx22kw4byi3",
+        "windowId": "mt8dulduptfwwk",
+        "dishName": "冰美式",
+        "date": "2024-03-26",
+        "price": null,
+        "rating": 5,
+        "images": [
+          "http://localhost:18923/images/1787645325798-26s0ac.jpg"
+        ],
+        "review": "很怀念在这家公司咖啡自由和冰块自由的日子，离开这家公司之后我自己做的美式就都是热的了。。。(｡ ́︿ ̀｡)最近不知道是不是年纪慢慢大了的原因，对冰的饮料没有那么执着了，昨天的美式甚至要的热的。",
+        "createdAt": 1787645404604
+      },
+      {
+        "id": "mt8erxsaw5uziy",
+        "windowId": "mt8eoo4nm26ffk",
+        "dishName": "茉色青黛",
+        "date": "2024-04-04",
+        "price": null,
+        "rating": 5,
+        "images": [
+          "http://localhost:18923/images/1787646744223-o7jtxj.jpg"
+        ],
+        "review": "24年清明节假期去徐州玩的时候看到徐州居然也有茶话弄，就整了一杯，当支持老家的品牌了。PS:抽奖没有抽到（非常的意料之内了。",
+        "createdAt": 1787646845386
+      },
+      {
+        "id": "mt8euh4qftcab8",
+        "windowId": "mt8esogpkrbho8",
+        "dishName": "茶马摘花·玫瑰普洱拿铁",
+        "date": "2024-04-26",
+        "price": null,
+        "rating": 5,
+        "images": [
+          "http://localhost:18923/images/1787646927328-2gpotb.jpg"
+        ],
+        "review": "听名字就知道好喝，不过这个牌子确实很耳生。",
+        "createdAt": 1787646963770
+      },
+      {
+        "id": "mt8f03mq9dej1c",
+        "windowId": "mt8dulduptfwwk",
+        "dishName": "养生茶",
+        "date": "2024-05-09",
+        "price": null,
+        "rating": 5,
+        "images": [
+          "http://localhost:18923/images/1787647124360-wdk3ln.jpg"
+        ],
+        "review": "当时隐隐觉得天天两杯冰美式可能对身体不是很好，就整了点养生茶喝。坚持了应该没几天，就又投入冰美式的怀抱了",
+        "createdAt": 1787647226210
+      },
+      {
+        "id": "mt8f3omxd34ezo",
+        "windowId": "mt8dulduptfwwk",
+        "dishName": "茶",
+        "date": "2024-05-09",
+        "price": null,
+        "rating": 4,
+        "images": [
+          "http://localhost:18923/images/1787647352803-e21asw.jpg"
+        ],
+        "review": "依旧是装模作样健康的一天",
+        "createdAt": 1787647393401
+      },
+      {
+        "id": "mt8f5wi2l0h0hh",
+        "windowId": "mt8f4gz8vxy2md",
+        "dishName": "鸳鸯",
+        "date": "2024-05-10",
+        "price": null,
+        "rating": 5,
+        "images": [
+          "http://localhost:18923/images/1787647446510-0o88il.jpg"
+        ],
+        "review": "有一点点印象，因为名字属实很独特。其实就是奶和茶，味道应该还不错。",
+        "createdAt": 1787647496906
+      },
+      {
+        "id": "mt8f81tdlyhe45",
+        "windowId": "mt8f6l9u0d7z9z",
+        "dishName": "西瓜汁",
+        "date": "2024-05-11",
+        "price": null,
+        "rating": 5,
+        "images": [
+          "http://localhost:18923/images/1787647536500-ityn69.jpg"
+        ],
+        "review": "要不是这张照片我都忘了在苏州这家狼人杀店点过他们的西瓜汁。。。（隐约有预感，这天是抓到他趁我出去打狼人杀和别的女生语音的日子，一看相册还真是。。）",
+        "createdAt": 1787647597105
+      },
+      {
+        "id": "mt8fg8jddipx7p",
+        "windowId": "mt858ncrnj5ljf",
+        "dishName": "纯绿研茶后",
+        "date": "2024-05-16",
+        "price": null,
+        "rating": 5,
+        "images": [
+          "http://localhost:18923/images/1787647764685-bigllc.jpg"
+        ],
+        "review": "给当时的同事一起过生日的时候点的。他也在我离职后一年跳槽了，跳槽的时候还问我当初跳槽有没有被拖延，我当时离职还挺顺利的他倒是被老板几番挽留，还拖着他让他三个月后再离职。。。这么看我们当时的老板确实还是有点坏的，果然资本家是不可能完全共情打工人的。。",
+        "createdAt": 1787647979065
+      },
+      {
+        "id": "mt8fkxntc2neht",
+        "windowId": "mt8fi3mcjms93m",
+        "dishName": "黄桃果粒酸奶",
+        "date": "2024-05-21",
+        "price": null,
+        "rating": 5,
+        "images": [
+          "http://localhost:18923/images/1787648071283-qqmdko.jpg"
+        ],
+        "review": "公司的下午茶，虽然因为我高中那会狠狠喝酸奶，一下子喝了一整板，导致我喝伤了，但这种有果粒酸奶还是勉强能接受的。",
+        "createdAt": 1787648198249
+      },
+      {
+        "id": "mt8fmpcpfvbejx",
+        "windowId": "mt8fi3mcjms93m",
+        "dishName": "纯牛奶",
+        "date": "2024-05-24",
+        "price": null,
+        "rating": 5,
+        "images": [
+          "http://localhost:18923/images/1787648213281-y4609p.jpg"
+        ],
+        "review": "苏州哪家公司放在零食柜里，我有时候用来做拿铁",
+        "createdAt": 1787648280793
+      },
+      {
+        "id": "mt8fqakwgfeibx",
+        "windowId": "mt858ncrnj5ljf",
+        "dishName": "小奶茉",
+        "date": "2024-05-24",
+        "price": null,
+        "rating": 5,
+        "images": [
+          "http://localhost:18923/images/1787648326722-pb0gup.jpg"
+        ],
+        "review": "喜茶的奶茶一向是不错的，点热的好像是因为那会在吃中药，不能喝冰的来着。但那个中药吃完之后也没有什么作用，可恶！(♯｀∧´)",
+        "createdAt": 1787648448273
+      },
+      {
+        "id": "mt8fsrukjccrkk",
+        "windowId": "mt8fqp8tsoy858",
+        "dishName": "可乐",
+        "date": "2024-05-28",
+        "price": 0,
+        "rating": 1,
+        "images": [
+          "http://localhost:18923/images/1787648495537-x8allc.jpg"
+        ],
+        "review": "当时公司去山东团建，刚从泰山下来，在一家饭店吃饭，它家只有百事的无糖可乐，没有可口的。可恶，太没品味了！(♯｀∧´)",
+        "createdAt": 1787648563964
+      },
+      {
+        "id": "mt8fuih5lma0mk",
+        "windowId": "mt8ft476j14uyn",
+        "dishName": "红豆薏米水",
+        "date": "2024-05-30",
+        "price": null,
+        "rating": 4,
+        "images": [
+          "http://localhost:18923/images/1787648587185-jnrdx4.jpg"
+        ],
+        "review": "看背景是在当时住的公寓对面的那个学校食堂买的，隐约记得这个学校食堂有个麻辣香锅还不错",
+        "createdAt": 1787648645129
+      },
+      {
+        "id": "mt8fw869upoi1f",
+        "windowId": "mt8fuqhlh3sfvl",
+        "dishName": "茉莉花茶",
+        "date": "2024-06-01",
+        "price": null,
+        "rating": 4,
+        "images": [
+          "http://localhost:18923/images/1787648658825-7e3jtu.jpg"
+        ],
+        "review": "还好，就一般的茶味，应该是吃完晚饭去买的，或者取完快递顺手买了一瓶。",
+        "createdAt": 1787648725089
+      },
+      {
+        "id": "mt8fysf7zkyj7o",
+        "windowId": "mt8fwie0o72qet",
+        "dishName": "蓝莓黑米果粒风味发酵乳",
+        "date": "2024-06-02",
+        "price": null,
+        "rating": 4,
+        "images": [
+          "http://localhost:18923/images/1787648742872-5yi6nx.jpg"
+        ],
+        "review": "公司的下午茶，才发现这个酸奶的牌子叫光明，这家公司前端的一个同事也叫光明诶。",
+        "createdAt": 1787648844643
+      },
+      {
+        "id": "mt8g41ayhr79cx",
+        "windowId": "mt8fztlohqbrsy",
+        "dishName": "美式",
+        "date": "2024-06-08",
+        "price": null,
+        "rating": 1,
+        "images": [
+          "http://localhost:18923/images/1787648910838-dxe676.jpg"
+        ],
+        "review": "又是一段不太美好的回忆，当时他说和异性有来往是很正常的事，不可能谈恋爱之后就完全没有自己的社交了。然后我去北京找他的时候就去见了两个大学同学。当时这个男生在朝阳，等我跟这个男叙完旧已经七点左右了，到通州就已经九点左右了，在我刚下地铁的时候他就给我打了视频，看样子很着急，他明明知道这样会让对方痛苦，为什么还要做这些事呢。我恨他。",
+        "createdAt": 1787649089435
+      },
+      {
+        "id": "mt8g5sawvbzo2j",
+        "windowId": "mt8g4o8z7tfy8n",
+        "dishName": "海底椰冰柠茶",
+        "date": "2024-06-14",
+        "price": null,
+        "rating": 4,
+        "images": [
+          "http://localhost:18923/images/1787649154304-itcov5.jpg"
+        ],
+        "review": "不太记得味道了，应该是不好喝也不难喝",
+        "createdAt": 1787649171080
+      },
+      {
+        "id": "mt8g8jb5ery46e",
+        "windowId": "mt6nag3k36cuhb",
+        "dishName": "无糖可乐",
+        "date": "2024-06-16",
+        "price": 3,
+        "rating": 5,
+        "images": [
+          "http://localhost:18923/images/1787649271589-4y2eu8.jpg"
+        ],
+        "review": "本命饮料，权威无需多言",
+        "createdAt": 1787649299393
+      },
+      {
+        "id": "mt8g9wfjy85amv",
+        "windowId": "mt8g8zdtbdgn6a",
+        "dishName": "椰子水",
+        "date": "2024-06-17",
+        "price": null,
+        "rating": 5,
+        "images": [
+          "http://localhost:18923/images/1787649339651-diippr.jpg"
+        ],
+        "review": "没什么印象了，应该就是普通椰子水的味道",
+        "createdAt": 1787649363056
+      },
+      {
+        "id": "mt8gbjrce609dr",
+        "windowId": "mt858ncrnj5ljf",
+        "dishName": "烤黑糖啵啵真乳茶",
+        "date": "2024-06-23",
+        "price": null,
+        "rating": 5,
+        "images": [
+          "http://localhost:18923/images/1787649389816-3rykt2.jpg"
+        ],
+        "review": "终于迎来了喜茶中最好喝的奶茶！如果不考虑热量的话，我愿意天天喝它！",
+        "createdAt": 1787649439944
+      },
+      {
+        "id": "mt8gcm2oucp61z",
+        "windowId": "mt74t4m3vvtxcv",
+        "dishName": "茉莉花茶",
+        "date": "2024-06-30",
+        "price": null,
+        "rating": 5,
+        "images": [
+          "http://localhost:18923/images/1787649458224-g5wezi.jpg"
+        ],
+        "review": "除了无糖可口可乐最爱喝的",
+        "createdAt": 1787649489600
+      },
+      {
+        "id": "mt8ge5t5c8hwdt",
+        "windowId": "mt8gdl54xqsmln",
+        "dishName": "椰子水",
+        "date": "2024-07-02",
+        "price": null,
+        "rating": 5,
+        "images": [
+          "http://localhost:18923/images/1787649538601-0opald.jpg"
+        ],
+        "review": "普通椰子水味",
+        "createdAt": 1787649561833
+      },
+      {
+        "id": "mt8gfyi0z3edlk",
+        "windowId": "mt858ncrnj5ljf",
+        "dishName": "烤黑糖波波真乳茶",
+        "date": "2024-07-05",
+        "price": null,
+        "rating": 5,
+        "images": [
+          "http://localhost:18923/images/1787649602096-t25dy9.jpg"
+        ],
+        "review": "和烤黑糖啵啵的第二次遇见，好喝无需多言！！٩(˃̶͈̀௰˂̶͈́)و",
+        "createdAt": 1787649645672
+      },
+      {
+        "id": "mt8gjsvlh2tl7f",
+        "windowId": "mt8gib215cuizw",
+        "dishName": "矿泉水",
+        "date": "2024-07-12",
+        "price": null,
+        "rating": 2,
+        "images": [
+          "http://localhost:18923/images/1787649758387-wj8svn.jpg"
+        ],
+        "review": "应该是在高铁上渴了被迫买了溢价的水",
+        "createdAt": 1787649825009
+      },
+      {
+        "id": "mt8gl6oguu9xj0",
+        "windowId": "mt6nag3k36cuhb",
+        "dishName": "无糖可乐",
+        "date": "2024-07-14",
+        "price": null,
+        "rating": 5,
+        "images": [
+          "http://localhost:18923/images/1787649841125-9dwe79.jpg"
+        ],
+        "review": "应该是在回苏州飞机上，赞爆每一个有可口无糖可乐的航司！！",
+        "createdAt": 1787649889552
+      },
+      {
+        "id": "mt8gnowjw2ggds",
+        "windowId": "mt8fi3mcjms93m",
+        "dishName": "酸奶",
+        "date": "2024-07-15",
+        "price": null,
+        "rating": 4,
+        "images": [
+          "http://localhost:18923/images/1787649916373-knttin.jpg"
+        ],
+        "review": "饭后小饮料",
+        "createdAt": 1787650006483
+      },
+      {
+        "id": "mt8govnr06hopo",
+        "windowId": "mt8fi3mcjms93m",
+        "dishName": "酸奶（奶皮子版）",
+        "date": "2024-07-16",
+        "price": null,
+        "rating": 5,
+        "images": [
+          "http://localhost:18923/images/1787650024102-o0m5xg.jpg"
+        ],
+        "review": "非常完美的奶皮子٩(˃̶͈̀௰˂̶͈́)و",
+        "createdAt": 1787650061895
+      },
+      {
+        "id": "mt8gtorsclfifl",
+        "windowId": "mt8gpfvipedrh5",
+        "dishName": "火影忍者联名",
+        "date": "2024-07-18",
+        "price": null,
+        "rating": 5,
+        "images": [
+          "http://localhost:18923/images/1787650193182-uxiw12.jpg",
+          "http://localhost:18923/images/1787650195104-542994.jpg",
+          "http://localhost:18923/images/1787650196781-rj9m7k.jpg",
+          "http://localhost:18923/images/1787650199138-ysyd3b.jpg"
+        ],
+        "review": "主要是为了火影忍者联名的周边，隐约记得奶茶并不好喝，这些周边跟着我从苏州到天津再到西安，没再带来天津了，还是有点累赘的。",
+        "createdAt": 1787650286248
+      },
+      {
+        "id": "mt8gvazkjp1lxn",
+        "windowId": "mt8esogpkrbho8",
+        "dishName": "茶马摘花·玫瑰普洱拿铁",
+        "date": "2024-07-19",
+        "price": null,
+        "rating": 5,
+        "images": [
+          "http://localhost:18923/images/1787650313656-wsf5fe.jpg"
+        ],
+        "review": "又是你福万斯！我居然喝过你两次",
+        "createdAt": 1787650361696
+      },
+      {
+        "id": "mt8gwry8whzpmy",
+        "windowId": "mt8gdl54xqsmln",
+        "dishName": "椰子水",
+        "date": "2024-08-02",
+        "price": null,
+        "rating": 5,
+        "images": [
+          "http://localhost:18923/images/1787650405761-dlb9xx.jpg"
+        ],
+        "review": "看来那段时间很爱喝椰子水了",
+        "createdAt": 1787650430336
+      },
+      {
+        "id": "mt8gxg0hue2kja",
+        "windowId": "mt8gdl54xqsmln",
+        "dishName": "椰子水",
+        "date": "2024-08-02",
+        "price": null,
+        "rating": 5,
+        "images": [
+          "http://localhost:18923/images/1787650433793-13ap5i.jpg"
+        ],
+        "review": "连续两天诶，看来当时真的很喜欢了",
+        "createdAt": 1787650461521
+      },
+      {
+        "id": "mt8h2zmfq4mm32",
+        "windowId": "mt8h026820rnlh",
+        "dishName": "栀香茉莉",
+        "date": "2024-09-04",
+        "price": null,
+        "rating": 3,
+        "images": [
+          "http://localhost:18923/images/1787650639982-qqrqvn.jpg"
+        ],
+        "review": "在天津这家公司喝的第一个饮料，这家公司位置太偏了，都点不到外卖。人文关怀也没有上一家公司好。想喝饮料要么去楼下售卖机买，要么走一公里去商店买，特别不方便。",
+        "createdAt": 1787650720215
+      },
+      {
+        "id": "mt8h5oeaedsy7c",
+        "windowId": "mt8h4ewpc27e3o",
+        "dishName": "热美式",
+        "date": "2024-09-06",
+        "price": null,
+        "rating": 3,
+        "images": [
+          "http://localhost:18923/images/1787650790222-chyrwj.jpg"
+        ],
+        "review": "要是有制冰机就好了，这家公司给我的感觉还有办公室的氛围都是80年代的风格。",
+        "createdAt": 1787650845634
+      },
+      {
+        "id": "mt8h90y9977r5g",
+        "windowId": "mt7zmmw4meb118",
+        "dishName": "茉莉花香拿铁",
+        "date": "2024-09-06",
+        "price": null,
+        "rating": 5,
+        "images": [
+          "http://localhost:18923/images/1787650870858-182sey.jpg"
+        ],
+        "review": "应该是同事中午去商场吃饭给我带的。茉莉花香拿铁，瑞幸最善良的咖啡，又好喝热量又低，在小黄油美式出现之前我最爱的咖啡，没有之一，现在它俩并列第一吧。因为小黄油美式热量还是有点高的 T T",
+        "createdAt": 1787651001873
+      },
+      {
+        "id": "mt8hah5aa5eivs",
+        "windowId": "mt7zmmw4meb118",
+        "dishName": "茉莉花香拿铁",
+        "date": "2024-09-11",
+        "price": null,
+        "rating": 5,
+        "images": [
+          "http://localhost:18923/images/1787651013990-ak83lu.jpg"
+        ],
+        "review": "这次应该是我去商场买的，虽然没有漏标，但我知道一定是你！茉莉花香拿铁！",
+        "createdAt": 1787651069518
+      },
+      {
+        "id": "mt8hc0rk2c953s",
+        "windowId": "mt8h026820rnlh",
+        "dishName": "栀香茉莉",
+        "date": "2024-09-12",
+        "price": null,
+        "rating": 3,
+        "images": [
+          "http://localhost:18923/images/1787651093321-7574ub.jpg"
+        ],
+        "review": "老喝它可能是因为售卖机里无糖的只有它吧。。。",
+        "createdAt": 1787651141600
+      },
+      {
+        "id": "mt8hdrcv3f8srf",
+        "windowId": "mt84l0m8godq7t",
+        "dishName": "桂馥兰香",
+        "date": "2024-09-12",
+        "price": null,
+        "rating": 5,
+        "images": [
+          "http://localhost:18923/images/1787651153018-zcd95p.jpg"
+        ],
+        "review": "是你！桂馥兰香！我喜欢桂花风味的奶茶喝饮料٩(˃̶͈̀௰˂̶͈́)و",
+        "createdAt": 1787651222719
+      },
+      {
+        "id": "mt8hgb1jabita2",
+        "windowId": "mt84l0m8godq7t",
+        "dishName": "山野栀子",
+        "date": "2024-09-28",
+        "price": null,
+        "rating": 5,
+        "images": [
+          "http://localhost:18923/images/1787651229152-uoiiwy.jpg"
+        ],
+        "review": "！我怎么把你和桂馥兰香搞混了！你才是我在霸王茶姬里的最爱！！",
+        "createdAt": 1787651341543
+      },
+      {
+        "id": "mt8hgy47mkprmk",
+        "windowId": "mt84l0m8godq7t",
+        "dishName": "伯牙绝铉",
+        "date": "2024-10-13",
+        "price": null,
+        "rating": 5,
+        "images": [
+          "http://localhost:18923/images/1787651348149-5qk8y1.jpg"
+        ],
+        "review": "经典无需多言",
+        "createdAt": 1787651371447
+      },
+      {
+        "id": "mt8hkafk6jbmuk",
+        "windowId": "mt8hixfjj0slhh",
+        "dishName": "冻柠茶",
+        "date": "2024-10-14",
+        "price": null,
+        "rating": 1,
+        "images": [
+          "http://localhost:18923/images/1787651468701-5recqb.jpg"
+        ],
+        "review": "都怪这家公司周围荒无人烟，居然逼得我开始喝有糖饮料了。。",
+        "createdAt": 1787651527376
+      },
+      {
+        "id": "mt8hllhr8g9i1q",
+        "windowId": "mt8hkmi9rf3vd3",
+        "dishName": "米麻薯草莓奶绿",
+        "date": "2024-12-07",
+        "price": null,
+        "rating": 5,
+        "images": [
+          "http://localhost:18923/images/1787651575866-ua3af3.jpg"
+        ],
+        "review": "这名字就不可能难喝！",
+        "createdAt": 1787651588367
+      },
+      {
+        "id": "mt8hntrz3mn3ym",
+        "windowId": "mt8hkmi9rf3vd3",
+        "dishName": "冰淇淋红茶",
+        "date": "2024-12-18",
+        "price": null,
+        "rating": 5,
+        "images": [
+          "http://localhost:18923/images/1787651610699-9zsrm0.jpg"
+        ],
+        "review": "当时的同事推荐的，很可爱的一个小女孩，是那个办公室里为数不多的正常人，我真怀疑一开始公司想着在我们那个办公室养蛊来着，不然怎么五个人的办公室有三个神人。。。（考研之前喝的最后一杯饮料，很有纪念意义）",
+        "createdAt": 1787651692415
+      },
+      {
+        "id": "mt8hr4pz91922z",
+        "windowId": "mt8hozaxcjulih",
+        "dishName": "抹茶牛奶（?",
+        "date": "2024-12-13",
+        "price": null,
+        "rating": 5,
+        "images": [
+          "http://localhost:18923/images/1787651820663-h1vfwc.jpg"
+        ],
+        "review": "没漏标，不知道具体是啥，茶百道喝的也不多",
+        "createdAt": 1787651846567
+      },
+      {
+        "id": "mt8ht0o18wrmik",
+        "windowId": "mt8hrkda8dgj7a",
+        "dishName": "拿铁咖啡饮料",
+        "date": "2025-01-27",
+        "price": null,
+        "rating": 3,
+        "images": [
+          "http://localhost:18923/images/1787651871325-of1p1k.jpg"
+        ],
+        "review": "在这家鸟不拉屎的公司真的喝了好多平时根本不会喝的饮料。",
+        "createdAt": 1787651934625
+      },
+      {
+        "id": "mt8hv1yqsbhp9w",
+        "windowId": "mt8hu30mrm7lqj",
+        "dishName": "酒酿米麻薯",
+        "date": "2025-01-29",
+        "price": null,
+        "rating": 5,
+        "images": [
+          "http://localhost:18923/images/1787652013553-advufu.jpg"
+        ],
+        "review": "这个听名字应该也不会难喝吧，虽然我不记得是什么味道了",
+        "createdAt": 1787652029618
+      },
+      {
+        "id": "mt8hws1263j19i",
+        "windowId": "mt8eoo4nm26ffk",
+        "dishName": "茯生半日闲",
+        "date": "2025-01-30",
+        "price": null,
+        "rating": 5,
+        "images": [
+          "http://localhost:18923/images/1787652042727-5bblm1.jpg"
+        ],
+        "review": "虽然是我老家本地的牌子，但我还是要说这名字起的都不知道是啥做的（怪不得没印象，是当时拿错了）",
+        "createdAt": 1787652110054
+      },
+      {
+        "id": "mt8hz7jdnmhtk2",
+        "windowId": "mt8eoo4nm26ffk",
+        "dishName": "桂花引",
+        "date": "2025-01-30",
+        "price": null,
+        "rating": 5,
+        "images": [
+          "http://localhost:18923/images/1787652169311-6bbmwj.jpg"
+        ],
+        "review": "我爱桂花风味的所有奶茶，它排第一吧。",
+        "createdAt": 1787652223465
+      },
+      {
+        "id": "mt8i349ancrr4x",
+        "windowId": "mt8i0zi8dcwbov",
+        "dishName": "普洱茶",
+        "date": "2025-02-08",
+        "price": null,
+        "rating": 1,
+        "images": [
+          "http://localhost:18923/images/1787652374153-egkolz.jpg"
+        ],
+        "review": "你都叫普洱茶了，加什么糖啊。。。",
+        "createdAt": 1787652405838
+      },
+      {
+        "id": "mt8i4mbq0jyj7a",
+        "windowId": "mt84l0m8godq7t",
+        "dishName": "七里香",
+        "date": "2025-04-20",
+        "price": null,
+        "rating": 5,
+        "images": [
+          "http://localhost:18923/images/1787652422875-c5ebku.jpg"
+        ],
+        "review": "我就说我怎么喝上标准糖的果茶了，不是我喝的",
+        "createdAt": 1787652475910
+      },
+      {
+        "id": "mt8i9uiu8pohl4",
+        "windowId": "mt8i5t9ils4izz",
+        "dishName": "浪bar",
+        "date": "2025-05-04",
+        "price": null,
+        "rating": 5,
+        "images": [
+          "http://localhost:18923/images/1787652539012-63xeqs.jpg",
+          "http://localhost:18923/images/1787652541150-daybd1.jpg"
+        ],
+        "review": "我对于这次旅行的印象很好，虽然有点小插曲，但是总体来说玩的很快乐，去了很多景点，看了日出，还抓了小狗虾，嘿嘿。",
+        "createdAt": 1787652719814
+      },
+      {
+        "id": "mt8ic8lrzi33nv",
+        "windowId": "mt8h4ewpc27e3o",
+        "dishName": "自制奶咖",
+        "date": "2025-05-22",
+        "price": null,
+        "rating": 5,
+        "images": [
+          "http://localhost:18923/images/1787652759393-wqvjip.jpg"
+        ],
+        "review": "给孩子逼得自己动手做拿铁了",
+        "createdAt": 1787652831375
+      },
+      {
+        "id": "mt8idchicjb5er",
+        "windowId": "mt7zmmw4meb118",
+        "dishName": "青瓜椰子水",
+        "date": "2025-06-09",
+        "price": null,
+        "rating": 5,
+        "images": [
+          "http://localhost:18923/images/1787652839837-hrzl1n.jpg"
+        ],
+        "review": "健身那段时间总喝，很清爽，还能补电解质，可惜是限定。",
+        "createdAt": 1787652883062
       }
     ]
   }
