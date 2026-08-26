@@ -219,7 +219,12 @@ function getWindowsByFloor(floorId) {
 function getRecordsByWindow(windowId) {
   return state.data.records
     .filter((r) => r.windowId === windowId)
-    .sort((a, b) => new Date(b.date) - new Date(a.date) || b.createdAt - a.createdAt);
+    .sort((a, b) => {
+      // 置顶的排前面
+      if (a.pinned && !b.pinned) return -1;
+      if (!a.pinned && b.pinned) return 1;
+      return new Date(b.date) - new Date(a.date) || b.createdAt - a.createdAt;
+    });
 }
 function countRecordsByWindow(windowId) {
   return state.data.records.filter((r) => r.windowId === windowId).length;
@@ -366,7 +371,7 @@ function renderCanteens() {
   html += `
     <div class="card add-card" data-action="add-floor-quick">
       <div class="add-card-icon">+</div>
-      <div class="add-card-text">新建</div>
+      <div class="add-card-text">新建食堂</div>
     </div>
   `;
 
@@ -447,7 +452,7 @@ function renderFloors() {
   html += `
     <div class="card add-card" data-action="add-floor">
       <div class="add-card-icon">+</div>
-      <div class="add-card-text">添加</div>
+      <div class="add-card-text">添加楼层</div>
     </div>
   `;
 
@@ -455,7 +460,7 @@ function renderFloors() {
 
   grid.querySelectorAll(".card").forEach((card) => {
     if (card.dataset.action === "add-floor") {
-      card.onclick = () => openAddItemModal("floor", "新建", "名称");
+      card.onclick = () => openAddItemModal("floor", "新建楼层", "楼层名称（如：3楼）");
     } else if (card.dataset.action === "delete-floor") {
       // handled below
     } else {
@@ -477,7 +482,7 @@ function renderFloors() {
     btn.onclick = (e) => {
       e.stopPropagation();
       const f = getFloor(btn.dataset.id);
-      if (f) openAddItemModal("floor", "编辑", "名称", f.id, f.name);
+      if (f) openAddItemModal("floor", "编辑楼层", "楼层名称", f.id, f.name);
     };
   });
 }
@@ -517,7 +522,7 @@ function renderWindows() {
   html += `
     <div class="card add-card" data-action="add-window">
       <div class="add-card-icon">+</div>
-      <div class="add-card-text">添加</div>
+      <div class="add-card-text">添加窗口</div>
     </div>
   `;
 
@@ -525,7 +530,7 @@ function renderWindows() {
 
   grid.querySelectorAll(".card").forEach((card) => {
     if (card.dataset.action === "add-window") {
-      card.onclick = () => openAddItemModal("window", "新建", "名称");
+      card.onclick = () => openAddItemModal("window", "新建窗口", "窗口名称（如：黄焖鸡窗口）");
     } else if (card.dataset.action === "delete-window") {
       // handled below
     } else {
@@ -547,7 +552,7 @@ function renderWindows() {
     btn.onclick = (e) => {
       e.stopPropagation();
       const w = getWindow(btn.dataset.id);
-      if (w) openAddItemModal("window", "编辑", "名称", w.id, w.name);
+      if (w) openAddItemModal("window", "编辑窗口", "窗口名称", w.id, w.name);
     };
   });
 }
@@ -595,8 +600,10 @@ function renderRecords() {
     const ratingHtml = r.rating > 0 ? `<div class="record-stars">${getStars(r.rating)}</div>` : "";
 
     html += `
-      <div class="record-card" data-id="${r.id}">
+      <div class="record-card ${r.pinned ? 'pinned' : ''}" data-id="${r.id}">
+        ${r.pinned ? '<div class="pin-badge">📌 置顶</div>' : ''}
         <div class="card-actions record-card-actions">
+          <button class="btn-icon pin" data-action="pin-record" data-id="${r.id}" title="${r.pinned ? '取消置顶' : '置顶'}">${r.pinned ? '📌' : '📍'}</button>
           <button class="btn-icon edit" data-action="edit-record" data-id="${r.id}" title="编辑">✏️</button>
           <button class="btn-icon delete" data-action="delete-record" data-id="${r.id}" title="删除">🗑️</button>
         </div>
@@ -636,6 +643,17 @@ function renderRecords() {
     btn.onclick = (e) => {
       e.stopPropagation();
       confirmDelete("record", btn.dataset.id);
+    };
+  });
+
+  list.querySelectorAll("[data-action='pin-record']").forEach((btn) => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      const rec = getRecord(btn.dataset.id);
+      if (!rec) return;
+      rec.pinned = !rec.pinned;
+      saveData();
+      navigateTo("record", { windowId: rec.windowId });
     };
   });
 }
@@ -806,7 +824,7 @@ function openRecordModal(useCurrentWindow, editId) {
       document.getElementById("recordWindowSelect").value = w.id;
     }
   } else {
-    titleEl.textContent = "新建记录";
+    titleEl.textContent = "新建饭菜记录";
     document.getElementById("recordDate").value = todayStr();
     const hierarchy = document.getElementById("recordHierarchy");
     if (useCurrentWindow && state.nav.windowId) {
@@ -1087,6 +1105,7 @@ function openRecordDetail(recordId) {
     </div>
     <div class="detail-actions">
       <button class="btn btn-ghost" data-close="recordDetailModal">关闭</button>
+      <button class="btn ${r.pinned ? 'btn-primary' : 'btn-secondary'}" id="pinRecordBtn">${r.pinned ? '📌 取消置顶' : '📌 置顶'}</button>
       <button class="btn btn-secondary" id="editRecordBtn">✏️ 编辑记录</button>
       <button class="btn btn-danger" id="deleteRecordBtn">删除记录</button>
     </div>
@@ -1102,6 +1121,15 @@ function openRecordDetail(recordId) {
     window.__editRecord(recordId);
   };
 
+  document.getElementById("pinRecordBtn").onclick = () => {
+    const rec = getRecord(recordId);
+    if (!rec) return;
+    rec.pinned = !rec.pinned;
+    saveData();
+    closeModal("recordDetailModal");
+    navigateTo("record", { windowId: rec.windowId });
+  };
+
   openModal("recordDetailModal");
 }
 
@@ -1112,16 +1140,16 @@ function confirmDelete(type, id) {
   let text = "确定要删除吗？此操作不可撤销。";
   if (type === "canteen") {
     const c = getCanteen(id);
-    text = `确定要删除「${c?.name || ""}」吗？该目录下的所有楼层、窗口和饭菜记录都会被删除，此操作不可撤销！`;
+    text = `确定要删除食堂「${c?.name || ""}」吗？该食堂下的所有楼层、窗口和饭菜记录都会被删除，此操作不可撤销！`;
   } else if (type === "floor") {
     const f = getFloor(id);
-    text = `确定要删除「${f?.name || ""}」吗？该目录下的所有窗口和记录都会被删除！`;
+    text = `确定要删除楼层「${f?.name || ""}」吗？该楼层下的所有窗口和记录都会被删除！`;
   } else if (type === "window") {
     const w = getWindow(id);
-    text = `确定要删除「${w?.name || ""}」吗？该目录下所有记录都会被删除！`;
+    text = `确定要删除窗口「${w?.name || ""}」吗？该窗口下所有饭菜记录都会被删除！`;
   } else if (type === "record") {
     const r = getRecord(id);
-    text = `确定要删除记录「${r?.dishName || ""}」吗？`;
+    text = `确定要删除饭菜记录「${r?.dishName || ""}」吗？`;
   }
   msg.textContent = text;
   openModal("confirmModal");
