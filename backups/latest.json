@@ -1,12 +1,12 @@
 {
   "version": 1,
-  "exportedAt": "2026-08-26T12:00:45.274Z",
+  "exportedAt": "2026-08-26T12:07:11.197Z",
   "app": "canteen_records",
   "stats": {
     "canteens": 7,
     "floors": 14,
-    "windows": 74,
-    "records": 124
+    "windows": 76,
+    "records": 126
   },
   "data": {
     "canteens": [
@@ -597,6 +597,18 @@
         "floorId": "mt9qpfoqsxrsd4",
         "name": "小摊",
         "createdAt": 1787732856379
+      },
+      {
+        "id": "mta1mfjjxjc7st",
+        "floorId": "mt9qpfoqsxrsd4",
+        "name": "下午茶",
+        "createdAt": 1787745685808
+      },
+      {
+        "id": "mta1phq1ej24my",
+        "floorId": "mt8dp5ejexp33i",
+        "name": "小菜园",
+        "createdAt": 1787745828601
       }
     ],
     "records": [
@@ -2224,6 +2236,33 @@
         ],
         "review": "这顿饭在现在的我看来非常美味！但我当时不爱吃肝。。。可能当时的我只会给这顿饭3分。",
         "createdAt": 1787745644897
+      },
+      {
+        "id": "mta1odi1chegnu",
+        "windowId": "mta1mfjjxjc7st",
+        "dishName": "24年38妇女节",
+        "date": "2024-03-08",
+        "price": null,
+        "rating": 5,
+        "images": [
+          "http://localhost:18923/images/1787745694701-97md9w.jpg",
+          "http://localhost:18923/images/1787745719325-vbed3r.jpg"
+        ],
+        "review": "第一次吃山姆的熟食，好吃！！",
+        "createdAt": 1787745776473
+      },
+      {
+        "id": "mta1ttrmib6gp7",
+        "windowId": "mta1phq1ej24my",
+        "dishName": "鱼香锅巴+清炒时蔬",
+        "date": "2024-03-10",
+        "price": null,
+        "rating": 5,
+        "images": [
+          "http://localhost:18923/images/1787745834573-tidsks.jpg"
+        ],
+        "review": "来跟我认错，和好了。太没出息了我...就是因为一次次的纵容，才会让他越来越肆无忌惮。",
+        "createdAt": 1787746030834
       }
     ]
   }
